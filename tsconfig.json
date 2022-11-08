@@ -1,0 +1,18 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "outDir": "build",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2019"],
+    "moduleResolution": "node",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    // "noEmit": true,
+    "baseUrl": "."
+  }
+}
