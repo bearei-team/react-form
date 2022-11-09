@@ -1,7 +1,7 @@
 {
   "name": "@bearei/react-form",
   "version": "0.0.1",
-  "main": "./build/src/index.js",
+  "main": "./build/index.js",
   "author": "bearei <bear_ei@outlook.com>",
   "description": "A react form hook for react and native.",
   "license": "MIT",
@@ -26,7 +26,6 @@
     "@types/power-assert": "^1.5.3",
     "@types/react": "^18.0.25",
     "@types/sinon": "^9.0.9",
-    "babel-loader": "^9.1.0",
     "eslint": "^7.14.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -46,33 +45,15 @@
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
   },
-  "nyc": {
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "**/index.ts",
-      "**/*.d.ts"
-    ],
-    "extension": [
-      ".ts"
-    ],
-    "all": true,
-    "cache": false
-  },
   "files": [
-    "build/src"
+    "dist/src"
   ],
   "scripts": {
     "build": "webpack --config webpack.config.js --progress",
     "lint": "gts lint",
-    "test": "nyc mocha --require espower-typescript/guess test/*.test.ts test/**/*.test.ts",
-    "clean": "gts clean",
-    "compile": "tsc",
     "fix": "gts fix",
-    "prepare": "yarn compile",
-    "pretest": "yarn compile",
-    "posttest": "yarn lint"
+    "test": "nyc mocha --require espower-typescript/guess test/*.test.ts test/**/*.test.ts",
+    "clean": "gts clean"
   },
   "engines": {
     "node": ">=11.0.0"

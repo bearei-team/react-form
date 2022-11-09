@@ -6,11 +6,11 @@ import {RuleItem} from 'async-validator';
 /**
  * 表单项目 Props
  */
-export interface FormItemProps {
+export interface FormItemProps<T = unknown> {
   /**
    * 字段名称
    */
-  name?: string;
+  name?: keyof T;
 
   /**
    * 标签
@@ -46,10 +46,10 @@ const FormItem: React.FC<FormItemProps> = ({
   label,
   shouldUpdate = false,
 }) => {
-  const [, forceUpdate] = useState({});
-  const {signInField, getFieldValue, setFieldsValue, setFieldsErrors} =
+  const {signInField, getFieldValue, setFieldsValue, setFieldErrors} =
     useFormContext();
 
+  const [, forceUpdate] = useState({});
   const handleStoreChange =
     (name = '') =>
     (changeName?: string) =>
@@ -58,11 +58,12 @@ const FormItem: React.FC<FormItemProps> = ({
   const setChildrenProps = () => ({
     ...(label ? {prefix: label} : undefined),
     value: name && getFieldValue(name),
+    touched: false,
     onValueChange: (value: string | string[]) =>
       name && setFieldsValue({[name]: value}),
   });
 
-  const handleValidateRules = useCallback(
+  const handleValidate = useCallback(
     (rules?: RuleItem[]) => async () => {
       const isValidate = name && rules?.length !== 0;
 
@@ -75,30 +76,23 @@ const FormItem: React.FC<FormItemProps> = ({
           validateFirst,
         });
 
-        validatePromise.then(errors => setFieldsErrors(name, errors));
+        validatePromise.then(errors => setFieldErrors(name, errors));
 
         return validatePromise;
       }
 
       return [];
     },
-    []
+    [getFieldValue, name, setFieldErrors, validateFirst]
   );
 
   useEffect(() => {
     signInField({
       onStoreChange: handleStoreChange(name),
-      validateRules: handleValidateRules(rules),
+      validate: handleValidate(rules),
       props: {name, rules, validateFirst, shouldUpdate},
     });
-  }, [
-    name,
-    rules,
-    shouldUpdate,
-    validateFirst,
-    signInField,
-    handleValidateRules,
-  ]);
+  }, [name, rules, shouldUpdate, validateFirst, signInField, handleValidate]);
 
   return <>{children && React.cloneElement(children, setChildrenProps())}</>;
 };

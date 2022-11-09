@@ -1,4 +1,4 @@
-import Schema, {RuleItem} from 'async-validator';
+import Schema, {RuleItem, ValidateError} from 'async-validator';
 
 /**
  * 验证规则
@@ -64,12 +64,18 @@ const validateRules = async ({
   rules,
   validateFirst,
 }: ValidateRulesOptions) => {
-  let errors = [] as unknown[];
+  let errors = [] as ValidateError[];
 
   for (const rule of rules) {
     const validateErrors = await validateRule({name, value, rule})
       .then(() => undefined)
-      .catch(err => err.errors);
+      .catch(error => {
+        if (!error.errors) {
+          throw error;
+        }
+
+        return error.errors;
+      });
 
     if (validateErrors) {
       errors = [...errors, validateErrors];

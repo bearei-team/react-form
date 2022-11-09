@@ -9,10 +9,8 @@
     "allowJs": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
-    "module": "esnext",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    // "noEmit": true,
     "baseUrl": "."
   }
 }
