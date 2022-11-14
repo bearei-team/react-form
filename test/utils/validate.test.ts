@@ -1,39 +1,49 @@
-import assert from 'assert';
 import validate from '../../src/utils/validate';
+import {describe, expect, test} from '@jest/globals';
 
 describe('test/utils/validate.test.ts', () => {
-  it('It should be a success', async () => {
+  test('It should be a success.', async () => {
     const result = await validate({
       name: 'name',
       value: '123',
       rules: [
         {
           required: true,
+          message: 'Please enter your password.',
+        },
+        {
+          required: true,
           type: 'string',
           min: 1,
           max: 10,
-          message: 'Please enter the correct password.',
+          message: 'Please enter a 1-to 10-digit password.',
         },
       ],
     });
 
-    assert(result.length === 0);
+    expect(result).toEqual(undefined);
   });
 
-  it('It must have been a failure', async () => {
+  test('It should be a failure.', async () => {
     const result = await validate({
       name: 'name',
-      value: undefined,
+      value: 'undefined',
       validateFirst: true,
       rules: [
         {
-          required: true,
-          message: 'Please enter the correct password.',
+          type: 'number',
+          message: 'Please enter the number.',
+        },
+        {
+          type: 'array',
+          message: 'Please enter the array.',
         },
       ],
     });
 
-    assert(result.length !== 0);
-    assert(result[0].message === 'Please enter the correct password.');
+    expect(result?.name[0].field).toEqual('name');
+    expect(result?.name[0].message).toEqual('Please enter the number.');
+    expect(result?.name[0].fieldValue).toEqual('undefined');
+    expect(result?.rules?.length).toEqual(2);
   });
 });

@@ -1,12 +1,13 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import validateRules, {ValidateRule} from '../utils/validate';
+import validateRules from '../utils/validate';
 import useFormContext from '../hooks/useFormContext';
 import {RuleItem} from 'async-validator';
+import {Store} from '../hooks/useForm';
 
 /**
  * 表单项目 Props
  */
-export interface FormItemProps<T = unknown> {
+export interface FormItemProps<T = Store> {
   /**
    * 字段名称
    */
@@ -20,7 +21,7 @@ export interface FormItemProps<T = unknown> {
   /**
    * 验证规则集合
    */
-  rules?: ValidateRule[];
+  rules?: RuleItem[];
 
   /**
    * 是否优先验证首个规则. 如果开启,验证规则中出现第一个规则错误时将停止后续的规则验证.
@@ -39,7 +40,7 @@ export interface FormItemProps<T = unknown> {
 }
 
 const FormItem: React.FC<FormItemProps> = ({
-  name,
+  name = '',
   rules,
   children,
   validateFirst,
@@ -52,8 +53,9 @@ const FormItem: React.FC<FormItemProps> = ({
   const [, forceUpdate] = useState({});
   const handleStoreChange =
     (name = '') =>
-    (changeName?: string) =>
+    (changeName?: string) => {
       name === changeName && forceUpdate({});
+    };
 
   const setChildrenProps = () => ({
     ...(label ? {prefix: label} : undefined),
@@ -76,21 +78,22 @@ const FormItem: React.FC<FormItemProps> = ({
           validateFirst,
         });
 
-        validatePromise.then(errors => setFieldErrors(name, errors));
+        validatePromise.then(error => setFieldErrors(name, error));
 
         return validatePromise;
       }
 
-      return [];
+      return undefined;
     },
     [getFieldValue, name, setFieldErrors, validateFirst]
   );
 
   useEffect(() => {
     signInField({
+      touched: false,
+      props: {name, rules, validateFirst, shouldUpdate},
       onStoreChange: handleStoreChange(name),
       validate: handleValidate(rules),
-      props: {name, rules, validateFirst, shouldUpdate},
     });
   }, [name, rules, shouldUpdate, validateFirst, signInField, handleValidate]);
 

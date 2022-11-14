@@ -6,39 +6,39 @@ import useFormContext, {FormContext} from '../hooks/useFormContext';
 /**
  * 表单 Props
  */
-export interface FormProps<Values = unknown> {
+export interface FormProps<T = Record<string, unknown>> {
   /**
    * 表单实例
    */
-  form?: FormInstance<Values>;
+  form?: FormInstance<T>;
 
   /**
    * 初始化值
    */
-  initialValues?: Store;
+  initialValues?: Store<T>;
 
   /**
    * 监听完成
    */
-  onFinish?: Callbacks<Values>['onFinish'];
+  onFinish?: Callbacks<T>['onFinish'];
 
   /**
    * 监听完成失败
    */
-  onFinishFailed?: Callbacks<Values>['onFinishFailed'];
+  onFinishFailed?: Callbacks<T>['onFinishFailed'];
 
   /**
    * 监听值变更
    */
-  onValuesChange?: Callbacks<Values>['onValuesChange'];
+  onValuesChange?: Callbacks<T>['onValuesChange'];
 }
 
 /**
  * 表单类型
  */
 export type FormType = {
-  <Values = unknown>(
-    props: FormProps<Values> & PropsWithChildren<FormProps<Values>>
+  <T = Record<string, unknown>>(
+    props: FormProps<T> & PropsWithChildren<FormProps<T>>
   ): React.ReactElement;
 };
 
@@ -65,7 +65,7 @@ export interface FormInterface extends FormType {
 const Form: FormType = ({
   children,
   form,
-  initialValues = {},
+  initialValues,
   onFinish,
   onFinishFailed,
   onValuesChange,
@@ -82,7 +82,11 @@ const Form: FormType = ({
   }, [status]);
 
   return (
-    <FormContext.Provider value={formInstance}>{children}</FormContext.Provider>
+    <FormContext.Provider
+      value={formInstance as FormInstance<Record<string, unknown>>}
+    >
+      {children}
+    </FormContext.Provider>
   );
 };
 

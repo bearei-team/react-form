@@ -1,92 +1,64 @@
-import Schema, {RuleItem, ValidateError} from 'async-validator';
+import Schema, {
+  RuleItem,
+  ValidateError,
+  ValidateFieldsError,
+  Values,
+} from 'async-validator';
 
 /**
- * 验证规则
+ * 校验字段错误.
  */
-export type ValidateRule = RuleItem;
+export type FieldsError = ValidateFieldsError & {rules?: RuleItem[]};
 
 /**
- * 验证规则选项
+ * 校验规则选项.
  */
-export interface ValidateRuleOptions {
+export interface ValidateOptions {
   /**
-   * 字段名称
+   * 校验的字段名称.
    */
   name: string;
 
   /**
-   * 验证值
+   * 校验的值.
    */
   value: unknown;
 
   /**
-   * 验证规则
+   * 校验的规则.
    */
-  rule: ValidateRule;
-}
-
-/**
- * 验证规则集合选项
- */
-export interface ValidateRulesOptions {
-  /**
-   * 字段名称
-   */
-  name: string;
+  rules?: RuleItem[];
 
   /**
-   * 验证值
-   */
-  value: unknown;
-
-  /**
-   * 验证规则集合
-   */
-  rules: ValidateRule[];
-
-  /**
-   * 是否只验证首个规则
+   * 当某一规则校验不通过时，是否停止剩下的规则的校验.
    */
   validateFirst?: boolean;
 }
 
-const validateRule = ({name, value, rule}: ValidateRuleOptions) => {
-  const type = rule.type;
+const validate = ({name, value, rules = [], validateFirst}: ValidateOptions) =>
+  new Schema({[name]: rules}).validate(
+    {[name]: value},
+    {first: validateFirst, suppressWarning: true}
+  );
 
-  return new Schema({[name]: rule}).validate({
-    [name]: type === 'number' ? Number(value) : value,
-  });
-};
+const validateRule = async ({rules, name, value, ...args}: ValidateOptions) => {
+  const handleErrors = (
+    _errors: ValidateError[] | null,
+    fields: ValidateFieldsError | Values
+  ) =>
+    fields[name] === value ? undefined : ({...fields, rules} as FieldsError);
 
-const validateRules = async ({
-  name,
-  value,
-  rules,
-  validateFirst,
-}: ValidateRulesOptions) => {
-  let errors = [] as ValidateError[];
-
-  for (const rule of rules) {
-    const validateErrors = await validateRule({name, value, rule})
-      .then(() => undefined)
-      .catch(error => {
-        if (!error.errors) {
-          throw error;
-        }
-
-        return error.errors;
-      });
-
-    if (validateErrors) {
-      errors = [...errors, validateErrors];
-
-      if (validateFirst) {
-        break;
+  return validate({rules, name, value, ...args})
+    .then(() => undefined)
+    .catch(error => {
+      if (!error.errors) {
+        throw error;
       }
-    }
-  }
 
-  return errors.flat();
+      const {errors, fields} = error;
+
+      return handleErrors(errors, fields);
+    });
 };
 
-export default validateRules;
+export default validateRule;

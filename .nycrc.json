@@ -1,7 +1,0 @@
-{
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["**/index.ts", "**/index.tsx", "**/*.d.ts"],
-  "extension": [".ts", ".tsx"],
-  "all": true,
-  "cache": false
-}

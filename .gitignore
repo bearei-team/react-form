@@ -65,3 +65,6 @@ buck-out/
 
 # NYC
 .nyc_output/
+
+# Coverage
+coverage/
