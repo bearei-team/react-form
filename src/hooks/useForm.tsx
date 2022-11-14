@@ -87,18 +87,48 @@ export interface Callbacks<T> {
 /**
  * 表单实例
  */
-export interface FormInstance<T> {
+export interface FormInstance<T = Store> {
   /**
-   * 注册表单字段
+   * 签入表单字段
+   *
+   * @param entity 表单字段实体
    */
-  signInField: (entity: FieldEntity<T>) => {unSignIn: () => void};
+  signInField: (entity: FieldEntity<T>) => {unsigned: () => void};
 
   /**
    * 获取表单字段实体
    *
-   * @param unsigned 是否获取已经注销的表单字段实体,默认值 false
+   * @param unsigned 是否获取已经签出的表单字段实体,默认值 false
    */
   getFieldEntities: (unsigned?: boolean) => FieldEntity<T>[];
+
+  /**
+   * 签出表单字段
+   *
+   * @param name 签出的表单字段名称
+   */
+  unsignedField: (name: keyof T) => void;
+
+  /**
+   * 签出多个表单字段
+   *
+   * @param names 签出的表单字段名称集合,默认签出全部表单字段
+   */
+  unsignedFields: (names?: (keyof T)[]) => void;
+
+  /**
+   * 获取表单字段值
+   *
+   *  @param name 获取表单字段的名称
+   */
+  getFieldValue: (name: keyof T) => T[keyof T];
+
+  /**
+   * 获取表单字段校验错误
+   *
+   *  @param name 获取表单字段的名称
+   */
+  getFieldErrors: (name: keyof T) => Errors<T>[keyof T];
 }
 
 function formStore<T = Store>(formForceUpdate: Function) {
@@ -109,6 +139,11 @@ function formStore<T = Store>(formForceUpdate: Function) {
 
   let fieldEntities: FieldEntity<T>[] = [];
 
+  const getFieldEntities = (unsigned = false) =>
+    !unsigned
+      ? fieldEntities
+      : fieldEntities.filter(fieldEntity => fieldEntity.props.name);
+
   const signInField = (entity: FieldEntity<T>) => {
     const {name} = entity.props;
     const currentFieldEntities = getFieldEntities();
@@ -117,7 +152,7 @@ function formStore<T = Store>(formForceUpdate: Function) {
     !exist && (fieldEntities = [...currentFieldEntities, entity]);
 
     return {
-      unSignIn: () => name && unsignedField(name),
+      unsigned: () => name && unsignedField(name),
     };
   };
 
@@ -137,19 +172,14 @@ function formStore<T = Store>(formForceUpdate: Function) {
     }
   };
 
-  //   const unsignedFields = (names?: (keyof T)[]) =>
-  //     [
-  //       ...(names
-  //         ? names
-  //         : getFieldEntities(true)
-  //             .map(({props}) => props.name)
-  //             .filter(e => e)),
-  //     ].forEach(name => unsignedField(name!));
-
-  const getFieldEntities = (unsigned = false) =>
-    !unsigned
-      ? fieldEntities
-      : fieldEntities.filter(fieldEntity => fieldEntity.props.name);
+  const unsignedFields = (names?: (keyof T)[]) =>
+    [
+      ...(names
+        ? names
+        : getFieldEntities(true)
+            .map(({props}) => props.name)
+            .filter(e => e)),
+    ].forEach(name => unsignedField(name!));
 
   const setFieldsValue = (values: T, validate?: boolean) => {
     const nextStore = {...store, ...values};
@@ -185,7 +215,7 @@ function formStore<T = Store>(formForceUpdate: Function) {
     );
   };
 
-  //   const getFieldValue = (name: keyof T) => store[name];
+  const getFieldValue = (name: keyof T) => store[name];
   //   const getFieldsValue = (names?: (keyof T)[]) =>
   //     !names
   //       ? store
@@ -195,10 +225,10 @@ function formStore<T = Store>(formForceUpdate: Function) {
 
   const setFieldErrors = (name: keyof T, error?: FieldsError<T>) =>
     Object.assign(errors, {
-      [name]: {errors: error?.[name], rules: error?.rules},
+      [name]: error ? {errors: error?.[name], rules: error?.rules} : undefined,
     });
 
-  //   const getFieldErrors = (name: keyof T) => errors[name];
+  const getFieldErrors = (name: keyof T) => errors[name];
   //   const getFieldsErrors = (names?: (keyof T)[]) => {
   //     const errs = Object.entries(errors);
 
@@ -299,8 +329,12 @@ function formStore<T = Store>(formForceUpdate: Function) {
   //   };
 
   return {
-    signInField,
     getFieldEntities,
+    signInField,
+    unsignedField,
+    unsignedFields,
+    getFieldValue,
+    getFieldErrors,
   };
 }
 

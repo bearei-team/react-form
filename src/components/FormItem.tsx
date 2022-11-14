@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import validateRules from '../utils/validate';
-import useFormContext from '../hooks/useFormContext';
+// import React, {useCallback, useEffect, useState} from 'react';
+// import validateRules from '../utils/validate';
+// import useFormContext from '../hooks/useFormContext';
+// import {RuleItem} from 'async-validator';
 import {RuleItem} from 'async-validator';
-import {Store} from '../hooks/useForm';
+import {Store} from 'src/hooks/useForm';
 
 /**
  * 表单项目 Props
@@ -39,65 +40,65 @@ export interface FormItemProps<T = Store> {
   children?: JSX.Element;
 }
 
-const FormItem: React.FC<FormItemProps> = ({
-  name = '',
-  rules,
-  children,
-  validateFirst,
-  label,
-  shouldUpdate = false,
-}) => {
-  const {signInField, getFieldValue, setFieldsValue, setFieldErrors} =
-    useFormContext();
+// const FormItem: React.FC<FormItemProps> = ({
+//   name = '',
+//   rules,
+//   children,
+//   validateFirst,
+//   label,
+//   shouldUpdate = false,
+// }) => {
+//   const {signInField, getFieldValue, setFieldsValue, setFieldErrors} =
+//     useFormContext();
 
-  const [, forceUpdate] = useState({});
-  const handleStoreChange =
-    (name = '') =>
-    (changeName?: string) => {
-      name === changeName && forceUpdate({});
-    };
+//   const [, forceUpdate] = useState({});
+//   const handleStoreChange =
+//     (name = '') =>
+//     (changeName?: string) => {
+//       name === changeName && forceUpdate({});
+//     };
 
-  const setChildrenProps = () => ({
-    ...(label ? {prefix: label} : undefined),
-    value: name && getFieldValue(name),
-    touched: false,
-    onValueChange: (value: string | string[]) =>
-      name && setFieldsValue({[name]: value}),
-  });
+//   const setChildrenProps = () => ({
+//     ...(label ? {prefix: label} : undefined),
+//     value: name && getFieldValue(name),
+//     touched: false,
+//     onValueChange: (value: string | string[]) =>
+//       name && setFieldsValue({[name]: value}),
+//   });
 
-  const handleValidate = useCallback(
-    (rules?: RuleItem[]) => async () => {
-      const isValidate = name && rules?.length !== 0;
+//   const handleValidate = useCallback(
+//     (rules?: RuleItem[]) => async () => {
+//       const isValidate = name && rules?.length !== 0;
 
-      if (isValidate) {
-        const value = getFieldValue(name);
-        const validatePromise = validateRules({
-          name,
-          value,
-          rules: rules!,
-          validateFirst,
-        });
+//       if (isValidate) {
+//         const value = getFieldValue(name);
+//         const validatePromise = validateRules({
+//           name,
+//           value,
+//           rules: rules!,
+//           validateFirst,
+//         });
 
-        validatePromise.then(error => setFieldErrors(name, error));
+//         validatePromise.then(error => setFieldErrors(name, error));
 
-        return validatePromise;
-      }
+//         return validatePromise;
+//       }
 
-      return undefined;
-    },
-    [getFieldValue, name, setFieldErrors, validateFirst]
-  );
+//       return undefined;
+//     },
+//     [getFieldValue, name, setFieldErrors, validateFirst]
+//   );
 
-  useEffect(() => {
-    signInField({
-      touched: false,
-      props: {name, rules, validateFirst, shouldUpdate},
-      onStoreChange: handleStoreChange(name),
-      validate: handleValidate(rules),
-    });
-  }, [name, rules, shouldUpdate, validateFirst, signInField, handleValidate]);
+//   useEffect(() => {
+//     signInField({
+//       touched: false,
+//       props: {name, rules, validateFirst, shouldUpdate},
+//       onStoreChange: handleStoreChange(name),
+//       validate: handleValidate(rules),
+//     });
+//   }, [name, rules, shouldUpdate, validateFirst, signInField, handleValidate]);
 
-  return <>{children && React.cloneElement(children, setChildrenProps())}</>;
-};
+//   return <>{children && React.cloneElement(children, setChildrenProps())}</>;
+// };
 
-export default FormItem;
+// export default FormItem;
