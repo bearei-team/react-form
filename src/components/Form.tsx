@@ -1,12 +1,12 @@
-import useForm, {Callbacks, FormInstance, Store} from '../hooks/useForm';
-import React, {PropsWithChildren, useEffect, useState} from 'react';
-import FormItem from './FormItem';
-import useFormContext, {FormContext} from '../hooks/useFormContext';
+import React, {useEffect, useState} from 'react';
+import {Callback, FormInstance, Store} from '../hooks/formInstance';
+import {useForm} from '../hooks/useForm';
+import {FormContext} from '../hooks/useFormContext';
 
 /**
  * 表单 Props
  */
-export interface FormProps<T = Record<string, unknown>> {
+export interface FormProps<T> extends Callback<T> {
   /**
    * 表单实例
    */
@@ -15,83 +15,49 @@ export interface FormProps<T = Record<string, unknown>> {
   /**
    * 初始化值
    */
-  initialValues?: Store<T>;
+  initialValues?: T;
 
   /**
-   * 监听完成
+   * 表单子节点
    */
-  onFinish?: Callbacks<T>['onFinish'];
-
-  /**
-   * 监听完成失败
-   */
-  onFinishFailed?: Callbacks<T>['onFinishFailed'];
-
-  /**
-   * 监听值变更
-   */
-  onValuesChange?: Callbacks<T>['onValuesChange'];
+  children?: React.ReactNode;
 }
 
-/**
- * 表单类型
- */
-export type FormType = {
-  <T = Record<string, unknown>>(
-    props: FormProps<T> & PropsWithChildren<FormProps<T>>
-  ): React.ReactElement;
-};
-
-/**
- * 表单实例
- */
-export interface FormInterface extends FormType {
-  /**
-   * 表单项目
-   */
-  Item: typeof FormItem;
-
-  /**
-   * 表单 hook
-   */
-  useForm: typeof useForm;
-
-  /**
-   * 表单 Context
-   */
-  useFormContext: typeof useFormContext;
-}
-
-const Form: FormType = ({
+export function Form<T extends {} = Store>({
   children,
   form,
   initialValues,
   onFinish,
   onFinishFailed,
   onValuesChange,
-}) => {
+}: FormProps<T>) {
   const [status, setStatus] = useState('idle');
   const [formInstance] = useForm(form);
-  const {setCallbacks, setInitialValues} = formInstance;
-
-  setCallbacks({onFinish, onFinishFailed, onValuesChange});
-  setInitialValues(initialValues, status !== 'idle');
+  const {setCallback, setInitialValues} = formInstance;
 
   useEffect(() => {
-    status === 'idle' && setStatus('succeeded');
-  }, [status]);
+    if (status === 'idle') {
+      setCallback({onFinish, onFinishFailed, onValuesChange});
+      setInitialValues(initialValues, status !== 'idle');
+      setStatus('succeed');
+    }
+  }, [
+    initialValues,
+    onFinish,
+    onFinishFailed,
+    onValuesChange,
+    setCallback,
+    setInitialValues,
+    status,
+  ]);
 
   return (
-    <FormContext.Provider
-      value={formInstance as FormInstance<Record<string, unknown>>}
-    >
+    <FormContext.Provider value={formInstance as FormInstance<Store>}>
       {children}
     </FormContext.Provider>
   );
-};
+}
 
-Object.defineProperty(Form, 'Item', {value: FormItem});
-Object.defineProperty(Form, 'useForm', {value: useForm});
-Object.defineProperty(Form, 'useFormContext', {value: useFormContext});
-
-export default Form as FormInterface;
+export {useForm} from '../hooks/useForm';
+export {FormItem} from './FormItem';
+export {useFormContext} from '../hooks/useFormContext';

@@ -1,9 +1,9 @@
-import validate from '../../src/utils/validate';
+import {validateRule} from '../../src/utils/validate';
 import {describe, expect, test} from '@jest/globals';
 
 describe('test/utils/validate.test.ts', () => {
-  test('It should be a success.', async () => {
-    const result = await validate({
+  test('It should be a success', async () => {
+    const result = await validateRule({
       name: 'name',
       value: '123',
       rules: [
@@ -24,8 +24,8 @@ describe('test/utils/validate.test.ts', () => {
     expect(result).toEqual(undefined);
   });
 
-  test('It should be a failure.', async () => {
-    const result = await validate({
+  test('It should be a failure', async () => {
+    const result = await validateRule({
       name: 'name',
       value: 'undefined',
       validateFirst: true,

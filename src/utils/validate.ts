@@ -41,7 +41,12 @@ const validate = ({name, value, rules = [], validateFirst}: ValidateOptions) =>
     {first: validateFirst, suppressWarning: true}
   );
 
-const validateRule = async ({rules, name, value, ...args}: ValidateOptions) => {
+export const validateRule = async ({
+  rules,
+  name,
+  value,
+  ...args
+}: ValidateOptions) => {
   const handleErrors = (
     errors: ValidateError[] | null,
     fields: ValidateFieldsError | Values
@@ -59,5 +64,3 @@ const validateRule = async ({rules, name, value, ...args}: ValidateOptions) => {
       return handleErrors(errors, fields);
     });
 };
-
-export default validateRule;

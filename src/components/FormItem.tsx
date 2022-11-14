@@ -1,33 +1,19 @@
-// import React, {useCallback, useEffect, useState} from 'react';
-// import validateRules from '../utils/validate';
-// import useFormContext from '../hooks/useFormContext';
-// import {RuleItem} from 'async-validator';
+import React, {useCallback, useEffect, useState} from 'react';
+import {validateRule} from '../utils/validate';
+import {useFormContext} from '../hooks/useFormContext';
 import {RuleItem} from 'async-validator';
-import {Store} from 'src/hooks/useForm';
+import {ValidateOptions} from 'src/utils/validate';
+import {Store} from 'src/hooks/formInstance';
 
 /**
  * 表单项目 Props
  */
-export interface FormItemProps<T = Store> {
+export interface FormItemProps<T>
+  extends Pick<ValidateOptions, 'rules' | 'validateFirst'> {
   /**
-   * 字段名称
+   * 名称
    */
   name?: keyof T;
-
-  /**
-   * 标签
-   */
-  label?: string | JSX.Element;
-
-  /**
-   * 验证规则集合
-   */
-  rules?: RuleItem[];
-
-  /**
-   * 是否优先验证首个规则. 如果开启,验证规则中出现第一个规则错误时将停止后续的规则验证.
-   */
-  validateFirst?: boolean;
 
   /**
    * 是否更新组件
@@ -40,65 +26,65 @@ export interface FormItemProps<T = Store> {
   children?: JSX.Element;
 }
 
-// const FormItem: React.FC<FormItemProps> = ({
-//   name = '',
-//   rules,
-//   children,
-//   validateFirst,
-//   label,
-//   shouldUpdate = false,
-// }) => {
-//   const {signInField, getFieldValue, setFieldsValue, setFieldErrors} =
-//     useFormContext();
+export function FormItem<T extends {} = Store>({
+  name,
+  rules,
+  children,
+  validateFirst,
+  shouldUpdate = false,
+}: FormItemProps<T>) {
+  const [, forceUpdate] = useState({});
+  const {signInField, getFieldValue, setFieldsValue} = useFormContext<T>();
+  const handleStoreChange = useCallback(
+    (name?: keyof T) => (changeName?: keyof T) => {
+      name === changeName && forceUpdate({});
+    },
+    []
+  );
 
-//   const [, forceUpdate] = useState({});
-//   const handleStoreChange =
-//     (name = '') =>
-//     (changeName?: string) => {
-//       name === changeName && forceUpdate({});
-//     };
+  const setChildrenProps = () => ({
+    value: name && getFieldValue(name),
+    touched: false,
+    onValueChange: (value: string | string[]) =>
+      name && setFieldsValue({[name]: value} as T),
+  });
 
-//   const setChildrenProps = () => ({
-//     ...(label ? {prefix: label} : undefined),
-//     value: name && getFieldValue(name),
-//     touched: false,
-//     onValueChange: (value: string | string[]) =>
-//       name && setFieldsValue({[name]: value}),
-//   });
+  const handleValidate = useCallback(
+    (rules?: RuleItem[]) => async () => {
+      const isValidate = name && rules?.length !== 0;
 
-//   const handleValidate = useCallback(
-//     (rules?: RuleItem[]) => async () => {
-//       const isValidate = name && rules?.length !== 0;
+      if (isValidate) {
+        const value = getFieldValue(name);
 
-//       if (isValidate) {
-//         const value = getFieldValue(name);
-//         const validatePromise = validateRules({
-//           name,
-//           value,
-//           rules: rules!,
-//           validateFirst,
-//         });
+        return validateRule({
+          name: name as string,
+          value,
+          rules: rules!,
+          validateFirst,
+        });
+      }
 
-//         validatePromise.then(error => setFieldErrors(name, error));
+      return undefined;
+    },
+    [getFieldValue, name, validateFirst]
+  );
 
-//         return validatePromise;
-//       }
+  useEffect(() => {
+    signInField({
+      touched: false,
+      props: {name, rules, validateFirst, shouldUpdate},
+      onStoreChange: handleStoreChange(name),
+      validate: handleValidate(rules),
+    });
+  }, [
+    handleStoreChange,
+    handleValidate,
+    name,
+    rules,
+    shouldUpdate,
+    signInField,
+    validateFirst,
+  ]);
 
-//       return undefined;
-//     },
-//     [getFieldValue, name, setFieldErrors, validateFirst]
-//   );
-
-//   useEffect(() => {
-//     signInField({
-//       touched: false,
-//       props: {name, rules, validateFirst, shouldUpdate},
-//       onStoreChange: handleStoreChange(name),
-//       validate: handleValidate(rules),
-//     });
-//   }, [name, rules, shouldUpdate, validateFirst, signInField, handleValidate]);
-
-//   return <>{children && React.cloneElement(children, setChildrenProps())}</>;
-// };
-
-// export default FormItem;
+  return <>{children && React.cloneElement(children, setChildrenProps())}</>;
+}

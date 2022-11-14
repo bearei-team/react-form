@@ -1,4 +1,4 @@
-import useFormContext from '../../src/hooks/useFormContext';
+import {useFormContext} from '../../src/hooks/useFormContext';
 import {renderHook} from '@testing-library/react';
 import '@testing-library/jest-dom';
 

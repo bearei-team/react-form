@@ -1,8 +1,7 @@
-import validateRules from '../../src/utils/validate';
-import useForm, {FormInstance, Store} from '../../src/hooks/useForm';
-import {renderHook} from '@testing-library/react';
+import {validateRule} from '../../src/utils/validate';
 import '@testing-library/jest-dom';
 import {RuleType} from 'async-validator';
+import {FormInstance, Store, formInstance} from '../../src/hooks/formInstance';
 
 const names = ['name', 'password', 'code'];
 const signInField = (from: FormInstance<Record<string, unknown>>) => {
@@ -10,7 +9,7 @@ const signInField = (from: FormInstance<Record<string, unknown>>) => {
     from.signInField({
       onStoreChange: (changeName?: string) => changeName,
       validate: () =>
-        validateRules({
+        validateRule({
           name: item,
           value: item,
           rules: [
@@ -21,7 +20,6 @@ const signInField = (from: FormInstance<Record<string, unknown>>) => {
         }),
       props: {
         name: item,
-        label: item,
         validateFirst: true,
         shouldUpdate: false,
         rules: [
@@ -34,10 +32,9 @@ const signInField = (from: FormInstance<Record<string, unknown>>) => {
   });
 };
 
-describe('test/hooks/useForm.test.ts', () => {
+describe('test/hooks/formInstance.test.ts', () => {
   test('It should be getting an instance of the form', () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     expect(
       Object.entries(from).every(([, fun]) => typeof fun === 'function')
@@ -45,8 +42,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be a sign in field entity', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     signInField(from);
 
@@ -60,8 +56,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be the unsigned field entity', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     signInField(from);
 
@@ -89,8 +84,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be setting the initialization value', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     signInField(from);
 
@@ -115,8 +109,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be setting up a checksum error', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     signInField(from);
 
@@ -150,8 +143,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be setting the callback function', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     let finish: Store | undefined;
 
@@ -167,10 +159,9 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be setting whether the form fields are manipulated', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
-
+    const from = formInstance(() => {});
     signInField(from);
+
     from.setFieldTouched('name', true);
     from.setFieldTouched('password', true);
     expect(from.isFieldTouched('name')).toEqual(true);
@@ -185,8 +176,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be a validation field', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     signInField(from);
 
@@ -240,8 +230,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be a reset field', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     signInField(from);
 
@@ -264,8 +253,7 @@ describe('test/hooks/useForm.test.ts', () => {
   });
 
   test('It should be submitted', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+    const from = formInstance(() => {});
 
     signInField(from);
 
@@ -285,20 +273,3 @@ describe('test/hooks/useForm.test.ts', () => {
     from.submit(true);
   });
 });
-
-// describe('test/hooks/useForm.test.ts', () => {
-
-//   //   it('It should be submitted', async () => {
-//   //     const store = formStore(() => {});
-
-//   //     signInField(store);
-
-//   //     store.setCallbacks({
-//   //       onFinish: () => {},
-//   //       onFinishFailed: () => {},
-//   //       onValuesChange: () => {},
-//   //     });
-
-//   //     store.submit();
-//   //   });
-// });
