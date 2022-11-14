@@ -1,5 +1,5 @@
 import validateRules from '../../src/utils/validate';
-import useForm, {FormInstance} from '../../src/hooks/useForm';
+import useForm, {FormInstance, Store} from '../../src/hooks/useForm';
 import {renderHook} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {RuleType} from 'async-validator';
@@ -140,68 +140,49 @@ describe('test/hooks/useForm.test.ts', () => {
         ([, val]) => val.errors[0].field === 'field' && val.rules?.length === 1
       )
     );
+  });
 
-    // assert(store.getFieldError('name')[0].field === 'string');
-    // assert(store.getFieldError('password')[0].message === 'string');
-    // assert(store.getFieldError('code')[0].fieldValue === 'value');
-    // assert(
-    //   Object.entries(store.getFieldsErrors()).every(
-    //     ([, val]) => val?.[0].field === 'string'
-    //   )
-    // );
+  test('It should be setting the callback function', async () => {
+    const {result} = renderHook(() => useForm());
+    const [from] = result.current;
 
-    // assert(
-    //   Object.entries(store.getFieldsErrors(['name', 'password'])).every(
-    //     ([, val]) => val?.[0].field === 'string'
-    //   )
-    // );
+    let finish: Store | undefined;
+
+    from.setCallback({
+      onFinish: values => {
+        finish = values;
+
+        expect(typeof finish !== 'undefined').toEqual(true);
+      },
+      onFinishFailed: () => {},
+      onValuesChange: () => {},
+    });
+
+    from.submit();
+  });
+
+  test('It should be setting whether the form fields are manipulated', async () => {
+    const {result} = renderHook(() => useForm());
+    const [from] = result.current;
+
+    signInField(from);
+    from.setFieldTouched('name');
+    from.setFieldTouched('password');
+
+    expect(from.isFieldTouched('name')).toEqual(true);
+    expect(from.isFieldTouched('password')).toEqual(true);
+    expect(from.isFieldTouched('code')).toEqual(false);
+    expect(from.isFieldsTouched()).toEqual(false);
+
+    from.setFieldTouched('code');
+
+    expect(from.isFieldTouched('code')).toEqual(true);
+    expect(from.isFieldsTouched()).toEqual(true);
+    expect(from.isFieldsTouched(['name', 'code'])).toEqual(true);
   });
 });
 
 // describe('test/hooks/useForm.test.ts', () => {
-
-//   //   it('It should be setting up a checksum error', async () => {
-//   //     const store = formStore(() => {});
-//   //     const validateError = {
-//   //       message: 'string',
-//   //       fieldValue: 'value',
-//   //       field: 'string',
-//   //     };
-
-//   //     signInField(store);
-
-//   //     store.setFieldErrors('name', [validateError]);
-//   //     store.setFieldErrors('password', [validateError]);
-//   //     store.setFieldErrors('code', [validateError]);
-
-//   //     assert(store.getFieldError('name')[0].field === 'string');
-//   //     assert(store.getFieldError('password')[0].message === 'string');
-//   //     assert(store.getFieldError('code')[0].fieldValue === 'value');
-//   //     assert(
-//   //       Object.entries(store.getFieldsErrors()).every(
-//   //         ([, val]) => val?.[0].field === 'string'
-//   //       )
-//   //     );
-
-//   //     assert(
-//   //       Object.entries(store.getFieldsErrors(['name', 'password'])).every(
-//   //         ([, val]) => val?.[0].field === 'string'
-//   //       )
-//   //     );
-//   //   });
-
-//   //   it('It should be setting the callback function', async () => {
-//   //     const store = formStore(() => {});
-//   //     const result = store.setCallbacks({
-//   //       onFinish: () => {},
-//   //       onFinishFailed: () => {},
-//   //       onValuesChange: () => {},
-//   //     });
-
-//   //     assert(typeof result.onFinish === 'function');
-//   //     assert(typeof result.onFinishFailed === 'function');
-//   //     assert(typeof result.onValuesChange === 'function');
-//   //   });
 
 //   //   it('It should be set that the field is manipulated', async () => {
 //   //     const store = formStore(() => {});
