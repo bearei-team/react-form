@@ -3,7 +3,6 @@ import {validateRule} from '../utils/validate';
 import {useFormContext} from '../hooks/useFormContext';
 import {RuleItem} from 'async-validator';
 import {ValidateOptions} from 'src/utils/validate';
-import {Store} from 'src/hooks/formInstance';
 
 /**
  * 表单项目 Props
@@ -26,7 +25,7 @@ export interface FormItemProps<T>
   children?: JSX.Element;
 }
 
-export function FormItem<T extends {} = Store>({
+export function FormItem<T extends {}>({
   name,
   rules,
   children,
@@ -44,9 +43,8 @@ export function FormItem<T extends {} = Store>({
 
   const setChildrenProps = () => ({
     value: name && getFieldValue(name),
-    touched: false,
-    onValueChange: (value: string | string[]) =>
-      name && setFieldsValue({[name]: value} as T),
+    onChange: (value: string | string[]) =>
+      name && setFieldsValue({[name]: value} as T, true),
   });
 
   const handleValidate = useCallback(
