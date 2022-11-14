@@ -89,18 +89,18 @@ export interface Callbacks<T> {
  */
 export interface FormInstance<T = Store> {
   /**
-   * 签入表单字段
-   *
-   * @param entity 表单字段实体
-   */
-  signInField: (entity: FieldEntity<T>) => {unsigned: () => void};
-
-  /**
    * 获取表单字段实体
    *
    * @param unsigned 是否获取已经签出的表单字段实体,默认值 false
    */
   getFieldEntities: (unsigned?: boolean) => FieldEntity<T>[];
+
+  /**
+   * 签入表单字段
+   *
+   * @param entity 表单字段实体
+   */
+  signInField: (entity: FieldEntity<T>) => {unsigned: () => void};
 
   /**
    * 签出表单字段
@@ -117,21 +117,36 @@ export interface FormInstance<T = Store> {
   unsignedFields: (names?: (keyof T)[]) => void;
 
   /**
+   * 设置表单初始化值
+   *
+   * @param values 表单初始化值
+   * @param init 表单是否已完成初始化,如果值为 true,该方法将不会执行初始化. 默认值 false
+   */
+  setInitialValues: (values?: T, init?: boolean) => void;
+
+  /**
+   * 获取表单初始化
+   */
+  getInitialValue: () => T;
+
+  /**
    * 获取表单字段值
    *
    *  @param name 获取表单字段的名称
    */
   getFieldValue: (name: keyof T) => T[keyof T];
 
+  getFieldsValue: (names?: (keyof T)[]) => T;
+
   /**
    * 获取表单字段校验错误
    *
    *  @param name 获取表单字段的名称
    */
-  getFieldErrors: (name: keyof T) => Errors<T>[keyof T];
+  getFieldError: (name: keyof T) => Errors<T>[keyof T];
 }
 
-function formStore<T = Store>(formForceUpdate: Function) {
+function formStore<T extends {} = Store>(formForceUpdate: Function) {
   const store = {} as T;
   const initialValues = {} as T;
   const callbacks = {} as Callbacks<T>;
@@ -167,7 +182,7 @@ function formStore<T = Store>(formForceUpdate: Function) {
         ({props}) => props.name !== name
       );
 
-      setFieldErrors(name);
+      setFieldError(name);
       setFieldsValue({...store, [name]: undefined}, true);
     }
   };
@@ -216,20 +231,20 @@ function formStore<T = Store>(formForceUpdate: Function) {
   };
 
   const getFieldValue = (name: keyof T) => store[name];
-  //   const getFieldsValue = (names?: (keyof T)[]) =>
-  //     !names
-  //       ? store
-  //       : names
-  //           .map(name => ({[name]: getFieldValue(name)}))
-  //           .reduce((a, b) => ({...a, ...b}), {});
+  const getFieldsValue = (names?: (keyof T)[]) =>
+    !names
+      ? store
+      : (names
+          .map(name => ({[name]: getFieldValue(name)}))
+          .reduce((a, b) => ({...a, ...b}), {}) as T);
 
-  const setFieldErrors = (name: keyof T, error?: FieldsError<T>) =>
+  const setFieldError = (name: keyof T, error?: FieldsError<T>) =>
     Object.assign(errors, {
       [name]: error ? {errors: error?.[name], rules: error?.rules} : undefined,
     });
 
-  const getFieldErrors = (name: keyof T) => errors[name];
-  //   const getFieldsErrors = (names?: (keyof T)[]) => {
+  const getFieldError = (name: keyof T) => errors[name];
+  //   const getFieldsError = (names?: (keyof T)[]) => {
   //     const errs = Object.entries(errors);
 
   //     return [
@@ -240,23 +255,23 @@ function formStore<T = Store>(formForceUpdate: Function) {
   //       .reduce((a, b) => ({...a, ...b}), {});
   //   };
 
-  //   const setInitialValues = (values = {} as T, init?: boolean) => {
-  //     if (init) {
-  //       return;
-  //     }
+  const setInitialValues = (values = {} as T, init?: boolean) => {
+    if (init) {
+      return;
+    }
 
-  //     Object.assign(initialValues as Store, values);
+    Object.assign(initialValues, values);
 
-  //     const entityNames = getFieldEntities(true).map(({props}) => props.name);
-  //     const results = Object.entries<unknown>(initialValues)
-  //       .filter(([key]) => entityNames.some(name => name === key))
-  //       .map(([a, b]) => ({[a]: b}))
-  //       .reduce((a, b) => ({...a, ...b}), {}) as Store;
+    const names = getFieldEntities(true).map(({props}) => props.name);
+    const fieldsValue = Object.entries(initialValues)
+      .filter(([key]) => names.some(name => name === key))
+      .map(([key, value]) => ({[key]: value}))
+      .reduce((a, b) => ({...a, ...b}), {}) as T;
 
-  //     setFieldsValue(results);
-  //   };
+    setFieldsValue(fieldsValue);
+  };
 
-  //   const getInitialValue = () => initialValues;
+  const getInitialValue = () => initialValues;
   //   const setCallbacks = (callbackValues: Callbacks<T>) =>
   //     Object.assign(callbacks, callbackValues);
 
@@ -319,7 +334,7 @@ function formStore<T = Store>(formForceUpdate: Function) {
 
   //     validateFields().then(() => {
   //       if (onFinish) {
-  //         const errs = getFieldsErrors();
+  //         const errs = getFieldsError();
 
   //         Object.keys(errs).length !== 0
   //           ? handleFinish(errs)
@@ -333,12 +348,15 @@ function formStore<T = Store>(formForceUpdate: Function) {
     signInField,
     unsignedField,
     unsignedFields,
+    setInitialValues,
+    getInitialValue,
     getFieldValue,
-    getFieldErrors,
+    getFieldsValue,
+    getFieldError,
   };
 }
 
-function useForm<T = Store>(form?: FormInstance<T>) {
+function useForm<T extends {} = Store>(form?: FormInstance<T>) {
   const formRef = useRef<FormInstance<T>>();
   const handleForceUpdate = (
     method: keyof FormInstance<T>,

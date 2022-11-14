@@ -64,7 +64,7 @@ describe('test/hooks/useForm.test.ts', () => {
     ).toEqual(true);
 
     expect(from.getFieldValue('code')).toEqual(undefined);
-    expect(from.getFieldErrors('code')).toEqual(undefined);
+    expect(from.getFieldError('code')).toEqual(undefined);
 
     from.unsignedFields(['name']);
     expect(
@@ -81,31 +81,31 @@ describe('test/hooks/useForm.test.ts', () => {
     ).toEqual(true);
   });
 
-  //   test('It should be setting the initialization value', async () => {
-  //     const {result} = renderHook(() => useForm());
-  //     const [from] = result.current;
+  test('It should be setting the initialization value', async () => {
+    const {result} = renderHook(() => useForm());
+    const [from] = result.current;
 
-  //     signInField(from);
+    signInField(from);
 
-  //     from.setInitialValues({name: 'name', password: 'password', code: 'code'});
-  //     expect(from.getFieldValue('name') === 'name').toEqual(true);
-  //     expect(from.getFieldValue('password') === 'password').toEqual(true);
-  //     expect(from.getFieldValue('code') === 'code').toEqual(true);
+    from.setInitialValues({name: 'name', password: 'password', code: 'code'});
+    expect(from.getFieldValue('name') === 'name').toEqual(true);
+    expect(from.getFieldValue('password') === 'password').toEqual(true);
+    expect(from.getFieldValue('code') === 'code').toEqual(true);
 
-  //     const valueKeys = Object.keys(from.getFieldsValue(['name', 'password']));
-  //     expect(
-  //       valueKeys.length === 2 &&
-  //         valueKeys.every(key => key === 'name' || key === 'password')
-  //     ).toEqual(true);
+    const valueKeys = Object.keys(from.getFieldsValue(['name', 'password']));
+    expect(
+      valueKeys.length === 2 &&
+        valueKeys.every(key => key === 'name' || key === 'password')
+    ).toEqual(true);
 
-  //     const allValues = from.getInitialValue();
+    const allValues = from.getInitialValue();
 
-  //     expect(
-  //       Object.entries(allValues).every(
-  //         ([, value]) => names.indexOf(`${value}`) !== -1
-  //       )
-  //     ).toEqual(true);
-  //   });
+    expect(
+      Object.entries(allValues).every(
+        ([, value]) => names.indexOf(`${value}`) !== -1
+      )
+    ).toEqual(true);
+  });
 
   //   it('It should be setting up a checksum error', async () => {
   //     const {result} = renderHook(() => useForm());
@@ -123,9 +123,9 @@ describe('test/hooks/useForm.test.ts', () => {
   //     from.setFieldErrors('password', {password: [validateError]});
   //     from.setFieldErrors('code', {code: [validateError]});
 
-  //     assert(store.getFieldErrors('name')[0].field === 'string');
-  //     assert(store.getFieldErrors('password')[0].message === 'string');
-  //     assert(store.getFieldErrors('code')[0].fieldValue === 'value');
+  //     assert(store.getFieldError('name')[0].field === 'string');
+  //     assert(store.getFieldError('password')[0].message === 'string');
+  //     assert(store.getFieldError('code')[0].fieldValue === 'value');
   //     assert(
   //       Object.entries(store.getFieldsErrors()).every(
   //         ([, val]) => val?.[0].field === 'string'
@@ -156,9 +156,9 @@ describe('test/hooks/useForm.test.ts', () => {
 //   //     store.setFieldErrors('password', [validateError]);
 //   //     store.setFieldErrors('code', [validateError]);
 
-//   //     assert(store.getFieldErrors('name')[0].field === 'string');
-//   //     assert(store.getFieldErrors('password')[0].message === 'string');
-//   //     assert(store.getFieldErrors('code')[0].fieldValue === 'value');
+//   //     assert(store.getFieldError('name')[0].field === 'string');
+//   //     assert(store.getFieldError('password')[0].message === 'string');
+//   //     assert(store.getFieldError('code')[0].fieldValue === 'value');
 //   //     assert(
 //   //       Object.entries(store.getFieldsErrors()).every(
 //   //         ([, val]) => val?.[0].field === 'string'
