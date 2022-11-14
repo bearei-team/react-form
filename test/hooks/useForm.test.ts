@@ -13,7 +13,10 @@ const signInField = (from: FormInstance<Record<string, unknown>>) => {
         validateRules({
           name: item,
           value: item,
-          rules: [{required: true, message: 'Please enter the field values'}],
+          rules: [
+            {required: true, message: 'Please enter the field values'},
+            {type: 'number', message: 'Please enter the number'},
+          ],
           validateFirst: true,
         }),
       props: {
@@ -21,7 +24,10 @@ const signInField = (from: FormInstance<Record<string, unknown>>) => {
         label: item,
         validateFirst: true,
         shouldUpdate: false,
-        rules: [{required: true, message: 'Please enter the field values'}],
+        rules: [
+          {required: true, message: 'Please enter the field values'},
+          {type: 'number', message: 'Please enter the number'},
+        ],
       },
       touched: false,
     });
@@ -123,21 +129,22 @@ describe('test/hooks/useForm.test.ts', () => {
     from.setFieldError('password', error);
     from.setFieldError('code', error);
 
-    expect(from.getFieldError('name').errors[0].field === 'field').toEqual(
+    expect(from.getFieldError('name')?.errors[0].field === 'field').toEqual(
       true
     );
 
     expect(
-      from.getFieldError('password').errors[0].message === 'message'
+      from.getFieldError('password')?.errors[0].message === 'message'
     ).toEqual(true);
 
     expect(
-      from.getFieldError('code').errors[0].fieldValue === 'fieldValue'
+      from.getFieldError('code')?.errors[0].fieldValue === 'fieldValue'
     ).toEqual(true);
 
     expect(
       Object.entries(from.getFieldsError()).every(
-        ([, val]) => val.errors[0].field === 'field' && val.rules?.length === 1
+        ([, value]) =>
+          value?.errors[0].field === 'field' && value.rules?.length === 1
       )
     );
   });
@@ -154,11 +161,9 @@ describe('test/hooks/useForm.test.ts', () => {
 
         expect(typeof finish !== 'undefined').toEqual(true);
       },
-      onFinishFailed: () => {},
-      onValuesChange: () => {},
     });
 
-    from.submit();
+    from.submit(true);
   });
 
   test('It should be setting whether the form fields are manipulated', async () => {
@@ -166,89 +171,122 @@ describe('test/hooks/useForm.test.ts', () => {
     const [from] = result.current;
 
     signInField(from);
-    from.setFieldTouched('name');
-    from.setFieldTouched('password');
-
+    from.setFieldTouched('name', true);
+    from.setFieldTouched('password', true);
     expect(from.isFieldTouched('name')).toEqual(true);
     expect(from.isFieldTouched('password')).toEqual(true);
     expect(from.isFieldTouched('code')).toEqual(false);
     expect(from.isFieldsTouched()).toEqual(false);
 
-    from.setFieldTouched('code');
-
+    from.setFieldTouched('code', true);
     expect(from.isFieldTouched('code')).toEqual(true);
     expect(from.isFieldsTouched()).toEqual(true);
     expect(from.isFieldsTouched(['name', 'code'])).toEqual(true);
   });
+
+  test('It should be a validation field', async () => {
+    const {result} = renderHook(() => useForm());
+    const [from] = result.current;
+
+    signInField(from);
+
+    from
+      .validateField('name')
+      .then(result => expect(result?.errors.length !== 0).toEqual(true));
+
+    from
+      .validateField('password')
+      .then(result => expect(result?.errors.length !== 0).toEqual(true));
+
+    from
+      .validateField('code')
+      .then(result => expect(result?.errors.length !== 0).toEqual(true));
+
+    from.validateFields(['name', 'password']).then(result => {
+      expect(
+        Object.entries(result).every(
+          ([key, value]) =>
+            ['name', 'password'].indexOf(key) !== -1 &&
+            ['name', 'password'].indexOf(value?.errors[0].field!) !== -1
+        )
+      );
+
+      expect(
+        Object.entries(from.getFieldsError(['name', 'password'])).every(
+          ([key, value]) =>
+            ['name', 'password'].indexOf(key) !== -1 &&
+            ['name', 'password'].indexOf(value?.errors[0]?.field!) !== -1
+        )
+      );
+    });
+
+    from.validateFields().then(result => {
+      expect(
+        Object.entries(result).every(
+          ([key, value]) =>
+            names.indexOf(key) !== -1 &&
+            names.indexOf(value?.errors[0]?.field!) !== -1
+        )
+      );
+
+      expect(
+        Object.entries(from.getFieldsError()).every(
+          ([key, value]) =>
+            names.indexOf(key) !== -1 &&
+            names.indexOf(value?.errors[0]?.field!) !== -1
+        )
+      );
+    });
+  });
+
+  test('It should be a reset field', async () => {
+    const {result} = renderHook(() => useForm());
+    const [from] = result.current;
+
+    signInField(from);
+
+    from.setInitialValues({name: 'name', password: 'password', code: 'code'});
+    from.resetField('name');
+    expect(!from.getFieldValue('name')).toEqual(true);
+
+    from.resetFields(['password']);
+    expect(!from.getFieldValue('password')).toEqual(true);
+
+    from.validateFields();
+    from.resetFields();
+    expect(
+      Object.entries(from.getFieldsValue()).filter(([, value]) => value).length
+    ).toEqual(0);
+
+    expect(
+      Object.entries(from.getFieldsError()).filter(([, value]) => value).length
+    ).toEqual(0);
+  });
+
+  test('It should be submitted', async () => {
+    const {result} = renderHook(() => useForm());
+    const [from] = result.current;
+
+    signInField(from);
+
+    from.setCallback({
+      onFinish: values => {
+        expect(typeof values !== 'undefined').toEqual(true);
+      },
+      onFinishFailed: errs => {
+        expect(
+          Object.entries(errs).filter(([, value]) => value).length
+        ).toEqual(3);
+      },
+    });
+
+    from.setInitialValues({name: 'name'});
+    from.submit();
+    from.submit(true);
+  });
 });
 
 // describe('test/hooks/useForm.test.ts', () => {
-
-//   //   it('It should be set that the field is manipulated', async () => {
-//   //     const store = formStore(() => {});
-
-//   //     signInField(store);
-//   //     store.setFieldTouched('name');
-//   //     store.setFieldTouched('password');
-//   //     store.setFieldTouched('code');
-
-//   //     assert(typeof store.isFieldTouched('name'));
-//   //     assert(typeof store.isFieldTouched('password'));
-//   //     assert(typeof store.isFieldTouched('code'));
-//   //     assert(typeof store.isFieldsTouched());
-//   //     assert(typeof store.isFieldsTouched(['name', 'code']));
-//   //   });
-
-//   //   it('It should be a validation field', async () => {
-//   //     const store = formStore(() => {});
-
-//   //     signInField(store);
-
-//   //     store.validateField('name')?.then(result => assert(result.length === 0));
-//   //     store
-//   //       .validateField('password')
-//   //       ?.then(result => assert(result.length === 0));
-//   //     store.validateField('code')?.then(result => assert(result.length === 0));
-//   //     store
-//   //       .validateFields()
-//   //       ?.then(result =>
-//   //         assert(
-//   //           Object.entries(result).every(
-//   //             ([key, val]) =>
-//   //               names.indexOf(key) !== -1 && names.indexOf(val?.[0].field!) !== -1
-//   //           )
-//   //         )
-//   //       );
-
-//   //     store
-//   //       .validateFields(['name', 'password'])
-//   //       ?.then(result =>
-//   //         assert(
-//   //           Object.entries(result).every(
-//   //             ([key, val]) =>
-//   //               names.indexOf(key) !== -1 && names.indexOf(val?.[0].field!) !== -1
-//   //           )
-//   //         )
-//   //       );
-//   //   });
-
-//   //   it('It should be a reset field', async () => {
-//   //     const store = formStore(() => {});
-//   //     signInField(store);
-
-//   //     store.setInitialValues({name: 'name', password: 'password', code: 'code'});
-//   //     store.resetField('name');
-//   //     assert(!store.getFieldValue('name'));
-
-//   //     store.resetFields(['password']);
-//   //     assert(!store.getFieldValue('password'));
-
-//   //     store.resetFields();
-//   //     assert(
-//   //       Object.entries(store.getFieldsValue()).filter(([, val]) => val).length ===
-//   //         0
-//   //     );
-//   //   });
 
 //   //   it('It should be submitted', async () => {
 //   //     const store = formStore(() => {});
