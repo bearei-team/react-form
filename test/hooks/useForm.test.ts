@@ -2,6 +2,7 @@ import validateRules from '../../src/utils/validate';
 import useForm, {FormInstance} from '../../src/hooks/useForm';
 import {renderHook} from '@testing-library/react';
 import '@testing-library/jest-dom';
+import {RuleType} from 'async-validator';
 
 const names = ['name', 'password', 'code'];
 const signInField = (from: FormInstance<Record<string, unknown>>) => {
@@ -107,37 +108,54 @@ describe('test/hooks/useForm.test.ts', () => {
     ).toEqual(true);
   });
 
-  //   it('It should be setting up a checksum error', async () => {
-  //     const {result} = renderHook(() => useForm());
-  //     const [from] = result.current;
+  test('It should be setting up a checksum error', async () => {
+    const {result} = renderHook(() => useForm());
+    const [from] = result.current;
 
-  //     signInField(from);
+    signInField(from);
 
-  //     const validateError = {
-  //       message: 'string',
-  //       fieldValue: 'value',
-  //       field: 'string',
-  //     };
+    const error = {
+      errors: [{message: 'message', fieldValue: 'fieldValue', field: 'field'}],
+      rules: [{type: 'string' as RuleType}],
+    };
 
-  //     from.setFieldErrors('name', {name: [validateError]});
-  //     from.setFieldErrors('password', {password: [validateError]});
-  //     from.setFieldErrors('code', {code: [validateError]});
+    from.setFieldError('name', error);
+    from.setFieldError('password', error);
+    from.setFieldError('code', error);
 
-  //     assert(store.getFieldError('name')[0].field === 'string');
-  //     assert(store.getFieldError('password')[0].message === 'string');
-  //     assert(store.getFieldError('code')[0].fieldValue === 'value');
-  //     assert(
-  //       Object.entries(store.getFieldsErrors()).every(
-  //         ([, val]) => val?.[0].field === 'string'
-  //       )
-  //     );
+    expect(from.getFieldError('name').errors[0].field === 'field').toEqual(
+      true
+    );
 
-  //     assert(
-  //       Object.entries(store.getFieldsErrors(['name', 'password'])).every(
-  //         ([, val]) => val?.[0].field === 'string'
-  //       )
-  //     );
-  //   });
+    expect(
+      from.getFieldError('password').errors[0].message === 'message'
+    ).toEqual(true);
+
+    expect(
+      from.getFieldError('code').errors[0].fieldValue === 'fieldValue'
+    ).toEqual(true);
+
+    expect(
+      Object.entries(from.getFieldsError()).every(
+        ([, val]) => val.errors[0].field === 'field' && val.rules?.length === 1
+      )
+    );
+
+    // assert(store.getFieldError('name')[0].field === 'string');
+    // assert(store.getFieldError('password')[0].message === 'string');
+    // assert(store.getFieldError('code')[0].fieldValue === 'value');
+    // assert(
+    //   Object.entries(store.getFieldsErrors()).every(
+    //     ([, val]) => val?.[0].field === 'string'
+    //   )
+    // );
+
+    // assert(
+    //   Object.entries(store.getFieldsErrors(['name', 'password'])).every(
+    //     ([, val]) => val?.[0].field === 'string'
+    //   )
+    // );
+  });
 });
 
 // describe('test/hooks/useForm.test.ts', () => {

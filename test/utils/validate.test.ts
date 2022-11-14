@@ -41,9 +41,9 @@ describe('test/utils/validate.test.ts', () => {
       ],
     });
 
-    expect(result?.name[0].field).toEqual('name');
-    expect(result?.name[0].message).toEqual('Please enter the number.');
-    expect(result?.name[0].fieldValue).toEqual('undefined');
+    expect(result?.errors[0].field).toEqual('name');
+    expect(result?.errors[0].message).toEqual('Please enter the number.');
+    expect(result?.errors[0].fieldValue).toEqual('undefined');
     expect(result?.rules?.length).toEqual(2);
   });
 });

@@ -23,21 +23,23 @@ export type FieldError = {
 };
 
 /**
- * 表单字段错误集合
+ * 表单字段校验错误
  */
-export type FieldsError<T> = {[key in keyof T]: ValidateError[]} & {
-  /**
-   * 校验规则集合
-   */
-  rules?: RuleItem[];
-};
+// export type FieldsError<T> = Record<keyof T, ValidateError[]>;
+
+// export interface FieldsError<T> {
+//   /**
+//    * 校验规则集合
+//    */
+//   rules?: RuleItem[];
+
+//   [key in keyof T]: ValidateError[];
+// }
 
 /**
  * 表单字段校验错误集合
  */
-export type Errors<T> = {
-  [key in keyof T]: FieldError;
-};
+export type Errors<T> = Record<keyof T, FieldError>;
 
 /**
  * 表单字段实体
@@ -51,7 +53,7 @@ export interface FieldEntity<T> {
   /**
    * 校验表单字段
    */
-  validate: () => Promise<FieldsError<T> | undefined>;
+  validate: () => Promise<FieldError | undefined>;
 
   /**
    * 表单字段 Props
@@ -139,11 +141,26 @@ export interface FormInstance<T = Store> {
   getFieldsValue: (names?: (keyof T)[]) => T;
 
   /**
+   * 设置表单字段校验错误
+   *
+   * @param name 设置表单字段的名称
+   * @param error 表单字段校验错误
+   */
+  setFieldError: (name: keyof T, error?: FieldError) => void;
+
+  /**
    * 获取表单字段校验错误
    *
    *  @param name 获取表单字段的名称
    */
   getFieldError: (name: keyof T) => Errors<T>[keyof T];
+
+  /**
+   * 获取多个表单字段校验错误
+   *
+   *  @param names 获取表单字段的名称集合
+   */
+  getFieldsError: (names?: (keyof T)[]) => Errors<T>;
 }
 
 function formStore<T extends {} = Store>(formForceUpdate: Function) {
@@ -238,22 +255,23 @@ function formStore<T extends {} = Store>(formForceUpdate: Function) {
           .map(name => ({[name]: getFieldValue(name)}))
           .reduce((a, b) => ({...a, ...b}), {}) as T);
 
-  const setFieldError = (name: keyof T, error?: FieldsError<T>) =>
-    Object.assign(errors, {
-      [name]: error ? {errors: error?.[name], rules: error?.rules} : undefined,
-    });
+  const setFieldError = (name: keyof T, error?: FieldError) => {
+    Object.assign(errors, {[name]: error});
+  };
 
   const getFieldError = (name: keyof T) => errors[name];
-  //   const getFieldsError = (names?: (keyof T)[]) => {
-  //     const errs = Object.entries(errors);
+  const getFieldsError = (names?: (keyof T)[]) => {
+    const errs = Object.entries<FieldError>(errors);
 
-  //     return [
-  //       ...(names ? errs.filter(([name]) => names.indexOf(name) !== -1) : errs),
-  //     ]
-  //       .map(([name, errs]) => ({[name]: errs}))
-  //       .flat()
-  //       .reduce((a, b) => ({...a, ...b}), {});
-  //   };
+    return [
+      ...(names
+        ? errs.filter(([name]) => names.indexOf(name as keyof T) !== -1)
+        : errs),
+    ]
+      .map(([name, errs]) => ({[name]: errs}))
+      .flat()
+      .reduce((a, b) => ({...a, ...b}), {}) as Errors<T>;
+  };
 
   const setInitialValues = (values = {} as T, init?: boolean) => {
     if (init) {
@@ -352,7 +370,9 @@ function formStore<T extends {} = Store>(formForceUpdate: Function) {
     getInitialValue,
     getFieldValue,
     getFieldsValue,
+    setFieldError,
     getFieldError,
+    getFieldsError,
   };
 }
 

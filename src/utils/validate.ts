@@ -43,10 +43,9 @@ const validate = ({name, value, rules = [], validateFirst}: ValidateOptions) =>
 
 const validateRule = async ({rules, name, value, ...args}: ValidateOptions) => {
   const handleErrors = (
-    _errors: ValidateError[] | null,
+    errors: ValidateError[] | null,
     fields: ValidateFieldsError | Values
-  ) =>
-    fields[name] === value ? undefined : ({...fields, rules} as FieldsError);
+  ) => (fields[name] === value ? undefined : {errors: errors ?? [], rules});
 
   return validate({rules, name, value, ...args})
     .then(() => undefined)
