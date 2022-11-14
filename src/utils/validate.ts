@@ -11,26 +11,26 @@ import Schema, {
 export type FieldsError = ValidateFieldsError & {rules?: RuleItem[]};
 
 /**
- * 校验规则选项.
+ * 校验规则选项
  */
 export interface ValidateOptions {
   /**
-   * 校验的字段名称.
+   * 校验的字段名称
    */
   name: string;
 
   /**
-   * 校验的值.
+   * 校验的值
    */
   value: unknown;
 
   /**
-   * 校验的规则.
+   * 校验的规则
    */
   rules?: RuleItem[];
 
   /**
-   * 当某一规则校验不通过时，是否停止剩下的规则的校验.
+   * 当某一规则校验不通过时，是否停止剩下的规则的校验
    */
   validateFirst?: boolean;
 }

@@ -52,34 +52,34 @@ describe('test/hooks/useForm.test.ts', () => {
     ).toEqual(true);
   });
 
-  test('It should be the unsigned field entity', async () => {
-    const {result} = renderHook(() => useForm());
-    const [from] = result.current;
+  //   test('It should be the unsigned field entity', async () => {
+  //     const {result} = renderHook(() => useForm());
+  //     const [from] = result.current;
 
-    signInField(from);
+  //     signInField(from);
 
-    from.unsignedField('code');
-    expect(
-      !from.getFieldEntities().find(({props}) => props.name === 'code')
-    ).toEqual(true);
+  //     from.unsignedField('code');
+  //     expect(
+  //       !from.getFieldEntities().find(({props}) => props.name === 'code')
+  //     ).toEqual(true);
 
-    expect(from.getFieldValue('code')).toEqual(undefined);
-    expect(from.getFieldErrors('code')).toEqual(undefined);
+  //     expect(from.getFieldValue('code')).toEqual(undefined);
+  //     expect(from.getFieldErrors('code')).toEqual(undefined);
 
-    from.unsignedFields(['name']);
-    expect(
-      !from
-        .getFieldEntities()
-        .find(({props}) => ['name', 'code'].indexOf(props.name!) !== -1)
-    ).toEqual(true);
+  //     from.unsignedFields(['name']);
+  //     expect(
+  //       !from
+  //         .getFieldEntities()
+  //         .find(({props}) => ['name', 'code'].indexOf(props.name!) !== -1)
+  //     ).toEqual(true);
 
-    from.unsignedFields();
-    expect(
-      !from
-        .getFieldEntities()
-        .find(({props}) => names.indexOf(props.name!) !== -1)
-    ).toEqual(true);
-  });
+  //     from.unsignedFields();
+  //     expect(
+  //       !from
+  //         .getFieldEntities()
+  //         .find(({props}) => names.indexOf(props.name!) !== -1)
+  //     ).toEqual(true);
+  //   });
 
   //   test('It should be setting the initialization value', async () => {
   //     const {result} = renderHook(() => useForm());

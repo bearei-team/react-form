@@ -3,66 +3,83 @@ import {useRef} from 'react';
 import {FormItemProps} from '../components/FormItem';
 
 /**
- * 字段仓库
+ * 表单字段存储
  */
 export type Store = Record<string, unknown>;
+
+/**
+ * 表单字段错误
+ */
 export type FieldError = {
+  /**
+   * 校验错误集合
+   */
   errors: ValidateError[];
+
+  /**
+   * 校验规则集合
+   */
   rules?: RuleItem[];
 };
 
 /**
- * 校验错误
+ * 表单字段错误集合
+ */
+export type FieldsError<T> = {[key in keyof T]: ValidateError[]} & {
+  /**
+   * 校验规则集合
+   */
+  rules?: RuleItem[];
+};
+
+/**
+ * 表单字段校验错误集合
  */
 export type Errors<T> = {
   [key in keyof T]: FieldError;
 };
 
-export type FieldsError<T> = {[key in keyof T]: ValidateError[]} & {
-  rules?: RuleItem[];
-};
-
 /**
- * 字段实体
+ * 表单字段实体
  */
 export interface FieldEntity<T> {
   /**
-   * 监听仓库变化
+   * 监听表单字段存储变化
    */
   onStoreChange: (changeName?: keyof T) => void;
 
   /**
-   * 校验规则
+   * 校验表单字段
    */
   validate: () => Promise<FieldsError<T> | undefined>;
 
   /**
-   * 字段 Props
+   * 表单字段 Props
    */
   props: FormItemProps<T>;
 
   /**
-   * 是否操作当前字段
+   * 是否操作当前表单字段
    */
   touched: boolean;
 }
 
 /**
- * 回调方法
+ * 表单回调方法
  */
 export interface Callbacks<T> {
   /**
-   * 监听完成
+   * 监听表单完成
    */
   onFinish?: (values: T) => void;
 
   /**
-   * 监听完成失败
+   * 监听表单完成失败
    */
   onFinishFailed?: (errors: Errors<T>) => void;
 
   /**
-   * 监听值变更
+   * 监听表单值变更
    */
   onValuesChange?: (changedValues: T, values: T) => void;
 }
@@ -72,109 +89,16 @@ export interface Callbacks<T> {
  */
 export interface FormInstance<T> {
   /**
-   * 注册字段
+   * 注册表单字段
    */
   signInField: (entity: FieldEntity<T>) => {unSignIn: () => void};
 
   /**
-   * 注销字段
+   * 获取表单字段实体
+   *
+   * @param unsigned 是否获取已经注销的表单字段实体,默认值 false
    */
-  unsignedField: (name: keyof T) => void;
-
-  /**
-   * 注销多个字段
-   */
-  unsignedFields: (names?: (keyof T)[]) => void;
-
-  /**
-   * 设置字段值
-   */
-  setFieldsValue: (values: T, validate?: boolean) => void;
-
-  /**
-   * 设置字段错误
-   */
-  setFieldErrors: (name: keyof T, error?: FieldsError<T>) => void;
-
-  /**
-   * 设置初始值
-   */
-  setInitialValues: (values?: T, init?: boolean) => void;
-
-  /**
-   * 设置回调
-   */
-  setCallbacks: (callbackValues: Callbacks<T>) => void;
-
-  /**
-   * 设置字段是否被操作
-   */
-  setFieldTouched: (name: keyof T) => void;
-
-  /**
-   * 获取字段实体
-   */
-  getFieldEntities: (pure?: boolean) => FieldEntity<T>[];
-
-  /**
-   * 检查字段是否被操作
-   */
-  isFieldTouched: (name: keyof T) => boolean | undefined;
-
-  /**
-   * 检查字段集合是否被操作
-   */
-  isFieldsTouched: (names?: (keyof T)[]) => boolean;
-
-  /**
-   * 获取字段值
-   */
-  getFieldValue: (name: keyof T) => unknown;
-
-  /**
-   * 获取多个指定字段值
-   */
-  getFieldsValue: (names?: (keyof T)[]) => T;
-
-  /**
-   * 获取初始化值
-   */
-  getInitialValue: () => T;
-
-  /**
-   * 获取字段错误
-   */
-  getFieldErrors: (name: keyof T) => FieldError;
-
-  /**
-   * 获取多个指定字段错误
-   */
-  getFieldsErrors: (names?: (keyof T)[]) => Errors<T>;
-
-  /**
-   * 校验字段
-   */
-  validateField: (name: T) => Promise<FieldsError<T> | undefined> | undefined;
-
-  /**
-   * 校验指定字段
-   */
-  validateFields: (names?: (keyof T)[]) => Promise<Errors<T>>;
-
-  /**
-   * 重置字段
-   */
-  resetField: (name: keyof T) => void;
-
-  /**
-   * 重置多个指定字段
-   */
-  resetFields: (names?: (keyof T)[]) => void;
-
-  /**
-   * 提交
-   */
-  submit: () => void;
+  getFieldEntities: (unsigned?: boolean) => FieldEntity<T>[];
 }
 
 function formStore<T = Store>(formForceUpdate: Function) {
@@ -188,9 +112,9 @@ function formStore<T = Store>(formForceUpdate: Function) {
   const signInField = (entity: FieldEntity<T>) => {
     const {name} = entity.props;
     const currentFieldEntities = getFieldEntities();
-    const isExist = currentFieldEntities.some(({props}) => props.name === name);
+    const exist = currentFieldEntities.some(({props}) => props.name === name);
 
-    !isExist && (fieldEntities = [...currentFieldEntities, entity]);
+    !exist && (fieldEntities = [...currentFieldEntities, entity]);
 
     return {
       unSignIn: () => name && unsignedField(name),
@@ -213,17 +137,17 @@ function formStore<T = Store>(formForceUpdate: Function) {
     }
   };
 
-  const unsignedFields = (names?: (keyof T)[]) =>
-    [
-      ...(names
-        ? names
-        : getFieldEntities(true)
-            .map(({props}) => props.name)
-            .filter(e => e)),
-    ].forEach(name => unsignedField(name!));
+  //   const unsignedFields = (names?: (keyof T)[]) =>
+  //     [
+  //       ...(names
+  //         ? names
+  //         : getFieldEntities(true)
+  //             .map(({props}) => props.name)
+  //             .filter(e => e)),
+  //     ].forEach(name => unsignedField(name!));
 
-  const getFieldEntities = (pure = false) =>
-    !pure
+  const getFieldEntities = (unsigned = false) =>
+    !unsigned
       ? fieldEntities
       : fieldEntities.filter(fieldEntity => fieldEntity.props.name);
 
@@ -261,50 +185,50 @@ function formStore<T = Store>(formForceUpdate: Function) {
     );
   };
 
-  const getFieldValue = (name: keyof T) => store[name];
-  const getFieldsValue = (names?: (keyof T)[]) =>
-    !names
-      ? store
-      : names
-          .map(name => ({[name]: getFieldValue(name)}))
-          .reduce((a, b) => ({...a, ...b}), {});
+  //   const getFieldValue = (name: keyof T) => store[name];
+  //   const getFieldsValue = (names?: (keyof T)[]) =>
+  //     !names
+  //       ? store
+  //       : names
+  //           .map(name => ({[name]: getFieldValue(name)}))
+  //           .reduce((a, b) => ({...a, ...b}), {});
 
   const setFieldErrors = (name: keyof T, error?: FieldsError<T>) =>
     Object.assign(errors, {
       [name]: {errors: error?.[name], rules: error?.rules},
     });
 
-  const getFieldErrors = (name: keyof T) => errors[name];
-  const getFieldsErrors = (names?: (keyof T)[]) => {
-    const errs = Object.entries(errors);
+  //   const getFieldErrors = (name: keyof T) => errors[name];
+  //   const getFieldsErrors = (names?: (keyof T)[]) => {
+  //     const errs = Object.entries(errors);
 
-    return [
-      ...(names ? errs.filter(([name]) => names.indexOf(name) !== -1) : errs),
-    ]
-      .map(([name, errs]) => ({[name]: errs}))
-      .flat()
-      .reduce((a, b) => ({...a, ...b}), {});
-  };
+  //     return [
+  //       ...(names ? errs.filter(([name]) => names.indexOf(name) !== -1) : errs),
+  //     ]
+  //       .map(([name, errs]) => ({[name]: errs}))
+  //       .flat()
+  //       .reduce((a, b) => ({...a, ...b}), {});
+  //   };
 
-  const setInitialValues = (values = {} as T, init?: boolean) => {
-    if (init) {
-      return;
-    }
+  //   const setInitialValues = (values = {} as T, init?: boolean) => {
+  //     if (init) {
+  //       return;
+  //     }
 
-    Object.assign(initialValues as Store, values);
+  //     Object.assign(initialValues as Store, values);
 
-    const entityNames = getFieldEntities(true).map(({props}) => props.name);
-    const results = Object.entries<unknown>(initialValues)
-      .filter(([key]) => entityNames.some(name => name === key))
-      .map(([a, b]) => ({[a]: b}))
-      .reduce((a, b) => ({...a, ...b}), {}) as Store;
+  //     const entityNames = getFieldEntities(true).map(({props}) => props.name);
+  //     const results = Object.entries<unknown>(initialValues)
+  //       .filter(([key]) => entityNames.some(name => name === key))
+  //       .map(([a, b]) => ({[a]: b}))
+  //       .reduce((a, b) => ({...a, ...b}), {}) as Store;
 
-    setFieldsValue(results);
-  };
+  //     setFieldsValue(results);
+  //   };
 
-  const getInitialValue = () => initialValues;
-  const setCallbacks = (callbackValues: Callbacks<T>) =>
-    Object.assign(callbacks, callbackValues);
+  //   const getInitialValue = () => initialValues;
+  //   const setCallbacks = (callbackValues: Callbacks<T>) =>
+  //     Object.assign(callbacks, callbackValues);
 
   const setFieldTouched = (name: keyof T) =>
     (fieldEntities = [
@@ -315,87 +239,68 @@ function formStore<T = Store>(formForceUpdate: Function) {
       ),
     ]);
 
-  const isFieldTouched = (name: keyof T) =>
-    fieldEntities.find(({props}) => props.name === name)?.touched;
+  //   const isFieldTouched = (name: keyof T) =>
+  //     fieldEntities.find(({props}) => props.name === name)?.touched;
 
-  const isFieldsTouched = (names?: (keyof T)[]) =>
-    [
-      ...(names
-        ? names
-        : getFieldEntities(true)
-            .map(({props}) => props.name)
-            .filter(e => e)),
-    ]
-      .map(name => isFieldTouched(name!))
-      .every(item => item);
+  //   const isFieldsTouched = (names?: (keyof T)[]) =>
+  //     [
+  //       ...(names
+  //         ? names
+  //         : getFieldEntities(true)
+  //             .map(({props}) => props.name)
+  //             .filter(e => e)),
+  //     ]
+  //       .map(name => isFieldTouched(name!))
+  //       .every(item => item);
 
-  const validateField = (name: keyof T) =>
-    getFieldEntities(true)
-      .find(({props}) => props.name === name)
-      ?.validate();
+  //   const validateField = (name: keyof T) =>
+  //     getFieldEntities(true)
+  //       .find(({props}) => props.name === name)
+  //       ?.validate();
 
-  const validateFields = (names?: (keyof T)[]) =>
-    Promise.all(
-      names
-        ? names.map(validateField)
-        : getFieldEntities(true)
-            .filter(({props}) => props.name)
-            .map(({props}) => validateField(props.name!))
-    ).then(results => results.reduce((a, b) => ({...a, ...b}), {})) as Promise<
-      Errors<T>
-    >;
+  //   const validateFields = (names?: (keyof T)[]) =>
+  //     Promise.all(
+  //       names
+  //         ? names.map(validateField)
+  //         : getFieldEntities(true)
+  //             .filter(({props}) => props.name)
+  //             .map(({props}) => validateField(props.name!))
+  //     ).then(results => results.reduce((a, b) => ({...a, ...b}), {})) as Promise<
+  //       Errors<T>
+  //     >;
 
-  const resetField = (name: keyof T) =>
-    setFieldsValue({[name]: undefined} as Store, false);
+  //   const resetField = (name: keyof T) =>
+  //     setFieldsValue({[name]: undefined} as Store, false);
 
-  const resetFields = (names?: (keyof T)[]) => {
-    const keys = Object.keys(store) as (keyof T)[];
+  //   const resetFields = (names?: (keyof T)[]) => {
+  //     const keys = Object.keys(store) as (keyof T)[];
 
-    [
-      ...(names ? keys.filter(name => names.indexOf(name) !== -1) : keys),
-    ].forEach(resetField);
-  };
+  //     [
+  //       ...(names ? keys.filter(name => names.indexOf(name) !== -1) : keys),
+  //     ].forEach(resetField);
+  //   };
 
-  const submit = () => {
-    const {onFinish, onFinishFailed} = callbacks;
-    const handleFinish = (errs: Errors) => {
-      onFinishFailed?.(errs);
-      formForceUpdate();
-    };
+  //   const submit = () => {
+  //     const {onFinish, onFinishFailed} = callbacks;
+  //     const handleFinish = (errs: Errors) => {
+  //       onFinishFailed?.(errs);
+  //       formForceUpdate();
+  //     };
 
-    validateFields().then(() => {
-      if (onFinish) {
-        const errs = getFieldsErrors();
+  //     validateFields().then(() => {
+  //       if (onFinish) {
+  //         const errs = getFieldsErrors();
 
-        Object.keys(errs).length !== 0
-          ? handleFinish(errs)
-          : onFinish(store as T);
-      }
-    });
-  };
+  //         Object.keys(errs).length !== 0
+  //           ? handleFinish(errs)
+  //           : onFinish(store as T);
+  //       }
+  //     });
+  //   };
 
   return {
     signInField,
-    unsignedField,
-    unsignedFields,
     getFieldEntities,
-    setFieldsValue,
-    getFieldValue,
-    getFieldsValue,
-    setFieldErrors,
-    getFieldErrors,
-    getFieldsErrors,
-    setInitialValues,
-    getInitialValue,
-    setCallbacks,
-    setFieldTouched,
-    isFieldTouched,
-    isFieldsTouched,
-    validateField,
-    validateFields,
-    resetField,
-    resetFields,
-    submit,
   };
 }
 
