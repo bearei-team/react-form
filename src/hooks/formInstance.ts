@@ -278,11 +278,7 @@ export function formInstance<T extends {} = Stores>(
 
   const unsignedFields = (names?: (keyof T)[]) =>
     [
-      ...(names
-        ? names
-        : getFieldEntities(true)
-            .map(({props}) => props.name)
-            .filter(e => e)),
+      ...(names ? names : getFieldEntities(true).map(({props}) => props.name)),
     ].forEach(name => unsignedField(name!));
 
   const setFieldsValue = (values: T, validate?: boolean) => {
@@ -369,7 +365,7 @@ export function formInstance<T extends {} = Stores>(
     fieldEntities = [
       ...getFieldEntities().map(fieldEntity =>
         fieldEntity.props.name === name
-          ? {...fieldEntity, touched: touched}
+          ? {...fieldEntity, touched}
           : fieldEntity
       ),
     ];
