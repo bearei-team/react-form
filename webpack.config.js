@@ -7,10 +7,10 @@ module.exports = {
     index: path.resolve(__dirname, './src/index.tsx'),
     Form: path.resolve(__dirname, './src/components/Form.tsx'),
     FormItem: path.resolve(__dirname, './src/components/FormItem.tsx'),
-    formInstance: path.resolve(__dirname, './src/hooks/formInstance.tsx'),
+    formInstance: path.resolve(__dirname, './src/hooks/formInstance.ts'),
     useForm: path.resolve(__dirname, './src/hooks/useForm.tsx'),
     useFormContext: path.resolve(__dirname, './src/hooks/useFormContext.tsx'),
-    validate: path.resolve(__dirname, './src/utils/validate.tsx'),
+    validate: path.resolve(__dirname, './src/utils/validate.ts'),
   },
   output: {
     path: path.resolve(__dirname, './build'),
