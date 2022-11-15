@@ -1,13 +1,14 @@
 import {validateRule} from '../../src/utils/validate';
 import '@testing-library/jest-dom';
 import {RuleType} from 'async-validator';
-import {FormInstance, Store, formInstance} from '../../src/hooks/formInstance';
+import {FormInstance, Stores, formInstance} from '../../src/hooks/formInstance';
 
 const names = ['name', 'password', 'code'];
 const signInField = (from: FormInstance<Record<string, unknown>>) => {
   names.forEach(item => {
     from.signInField({
       onStoreChange: (changeName?: string) => changeName,
+      onForceUpdate: () => {},
       validate: () =>
         validateRule({
           name: item,
@@ -99,7 +100,7 @@ describe('test/hooks/formInstance.test.ts', () => {
         valueKeys.every(key => key === 'name' || key === 'password')
     ).toEqual(true);
 
-    const allValues = from.getInitialValue();
+    const allValues = from.getInitialValues();
 
     expect(
       Object.entries(allValues).every(
@@ -145,9 +146,9 @@ describe('test/hooks/formInstance.test.ts', () => {
   test('It should be setting the callback function', async () => {
     const from = formInstance(() => {});
 
-    let finish: Store | undefined;
+    let finish: Stores | undefined;
 
-    from.setCallback({
+    from.setCallbacks({
       onFinish: values => {
         finish = values;
 
@@ -257,7 +258,7 @@ describe('test/hooks/formInstance.test.ts', () => {
 
     signInField(from);
 
-    from.setCallback({
+    from.setCallbacks({
       onFinish: values => {
         expect(typeof values !== 'undefined').toEqual(true);
       },

@@ -6,7 +6,13 @@ import {fireEvent} from '@testing-library/react';
 import {Form} from '../../src/components/Form';
 import {useEffect, useState} from 'react';
 
-function CostInput({onChange, value}: any) {
+interface CostInputProps {
+  onValueChange?: (value: string) => void;
+
+  value?: string;
+}
+
+function CostInput({onValueChange, value}: CostInputProps) {
   const [inputValue, setInputValue] = useState('');
   const removeDollarSign = (value: string) =>
     value[0] === '$' ? value.slice(1) : value;
@@ -18,7 +24,7 @@ function CostInput({onChange, value}: any) {
     const noDollarSign = removeDollarSign(inputtedValue);
 
     setInputValue(getReturnValue(noDollarSign));
-    onChange(getReturnValue(noDollarSign));
+    onValueChange?.(getReturnValue(noDollarSign));
   };
 
   useEffect(() => {
