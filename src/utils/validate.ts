@@ -6,26 +6,21 @@ import Schema, {
 } from 'async-validator';
 
 /**
- * 校验字段错误.
- */
-export type FieldsError = ValidateFieldsError & {rules?: RuleItem[]};
-
-/**
  * 校验规则选项
  */
 export interface ValidateOptions {
   /**
-   * 校验的字段名称
+   * 字段名称
    */
   name: string;
 
   /**
-   * 校验的值
+   * 校验值
    */
   value: unknown;
 
   /**
-   * 校验的规则
+   * 校验规则集合
    */
   rules?: RuleItem[];
 
