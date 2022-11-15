@@ -19,6 +19,11 @@ export interface FormItemProps<T>
    * 表单项目子元素
    */
   children?: JSX.Element;
+
+  /**
+   * 表单项目是否应该更新
+   */
+  shouldUpdate?: boolean;
 }
 
 export function FormItem<T extends {} = Stores>({
@@ -26,16 +31,18 @@ export function FormItem<T extends {} = Stores>({
   rules,
   children,
   validateFirst,
+  shouldUpdate = false,
 }: FormItemProps<T>) {
   const [, forceUpdate] = useState({});
   const {signInField, getFieldValue, setFieldsValue} = useFormContext<T>();
   const handleStoreChange = useCallback(
     (name?: keyof T) => (changeName?: keyof T) => {
-      name === changeName && forceUpdate({});
+      name === changeName && handleForceUpdate();
     },
     []
   );
 
+  const handleForceUpdate = () => forceUpdate({});
   const setChildrenProps = () => ({
     value: name && getFieldValue(name),
     onValueChange: (value: unknown) =>
@@ -65,13 +72,15 @@ export function FormItem<T extends {} = Stores>({
   useEffect(() => {
     signInField({
       touched: false,
-      props: {name, rules, validateFirst},
+      props: {name, rules, validateFirst, shouldUpdate},
       onStoreChange: handleStoreChange(name),
+      onForceUpdate: handleForceUpdate,
       validate: handleValidate(rules),
     });
   }, [
     name,
     rules,
+    shouldUpdate,
     validateFirst,
     signInField,
     handleValidate,

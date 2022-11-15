@@ -2,12 +2,12 @@ import {RuleItem, ValidateError} from 'async-validator';
 import {FormItemProps} from 'src/components/FormItem';
 
 /**
- * 表单字段存储
+ * 表单字段储存
  */
 export type Stores = Record<string, unknown>;
 
 /**
- * 表单字段错误
+ * 表单字段校验错误
  */
 export type FieldError = {
   /**
@@ -22,7 +22,7 @@ export type FieldError = {
 };
 
 /**
- * 表单字段校验错误集合
+ * 表单校验错误集合
  */
 export type Errors<T> = Record<keyof T, FieldError | undefined>;
 
@@ -36,6 +36,11 @@ export interface FieldEntity<T> {
   onStoreChange: (changeName?: keyof T) => void;
 
   /**
+   * 监听是否应该更新
+   */
+  onForceUpdate: () => void;
+
+  /**
    * 校验表单字段
    */
   validate: () => Promise<FieldError | undefined>;
@@ -46,7 +51,7 @@ export interface FieldEntity<T> {
   props: FormItemProps<T>;
 
   /**
-   * 是否操作当前表单字段
+   * 当前表单字段是否被操作
    */
   touched: boolean;
 }
@@ -78,28 +83,26 @@ export interface FormInstance<T = Stores> {
   /**
    * 获取表单字段实体
    *
-   * @param unsigned 是否获取已经签出的表单字段实体,默认值 false
+   * @param unsigned 是否获取已经签出的表单字段实体,默认 false
    */
   getFieldEntities: (unsigned?: boolean) => FieldEntity<T>[];
 
   /**
    * 签入表单字段
-   *
-   * @param entity 表单字段实体
    */
   signInField: (entity: FieldEntity<T>) => {unsigned: () => void};
 
   /**
    * 签出表单字段
    *
-   * @param name 签出的表单字段名称
+   * @param name 表单字段名称
    */
   unsignedField: (name: keyof T) => void;
 
   /**
    * 签出多个表单字段
    *
-   * @param names 签出的表单字段名称集合,默认签出全部表单字段
+   * @param names 表单字段名称集合
    */
   unsignedFields: (names?: (keyof T)[]) => void;
 
@@ -107,33 +110,41 @@ export interface FormInstance<T = Stores> {
    * 设置表单初始化值
    *
    * @param values 表单初始化值
-   * @param init 表单是否已完成初始化,如果值为 true,该方法将不会执行初始化. 默认值 false
+   * @param init 表单是否已完成初始化,如果值为 true,该方法将不会执行初始化. 默认 false
    */
   setInitialValues: (values?: T, init?: boolean) => void;
 
   /**
-   * 获取表单初始化
+   * 获取表单初始化值
    */
   getInitialValues: () => T;
 
   /**
-   * 设置字段值
+   * 设置表单字段值
+   *
+   * @param values 表单初始化值
+   * @param validate 是否校验字段. 默认 false
    */
   setFieldsValue: (values: T, validate?: boolean) => void;
 
   /**
    * 获取表单字段值
    *
-   *  @param name 获取表单字段的名称
+   *  @param name 表单字段名称
    */
   getFieldValue: (name: keyof T) => T[keyof T];
 
+  /**
+   * 获取多个表单字段值
+   *
+   *  @param names 表单字段名称集合
+   */
   getFieldsValue: (names?: (keyof T)[]) => T;
 
   /**
    * 设置表单字段校验错误
    *
-   * @param name 设置表单字段的名称
+   * @param name 表单字段名称
    * @param error 表单字段校验错误
    */
   setFieldError: (name: keyof T, error?: FieldError) => void;
@@ -141,23 +152,23 @@ export interface FormInstance<T = Stores> {
   /**
    * 获取表单字段校验错误
    *
-   *  @param name 获取表单字段的名称
+   *  @param name 表单字段名称
    */
   getFieldError: (name: keyof T) => Errors<T>[keyof T];
 
   /**
    * 获取多个表单字段校验错误
    *
-   *  @param names 获取表单字段的名称集合
+   *  @param names 表单字段名称集合
    */
   getFieldsError: (names?: (keyof T)[]) => Errors<T>;
 
   /**
    * 设置表单回调函数
    *
-   *  @param callbackValue 表单回调函数值
+   *  @param callbackValues 表单回调函数值
    */
-  setCallbacks: (callbackValue: Callbacks<T>) => void;
+  setCallbacks: (callbackValues: Callbacks<T>) => void;
 
   /**
    * 设置表单字段是否被操作
@@ -177,7 +188,7 @@ export interface FormInstance<T = Stores> {
   /**
    * 检查多个表单字段是否被操作,如果全部被操作返回 true,否者返回 false
    *
-   * @param names 表单字段名称集合
+   * @param names 表单字段名称
    */
   isFieldsTouched: (names?: (keyof T)[]) => boolean;
 
@@ -185,7 +196,7 @@ export interface FormInstance<T = Stores> {
    * 校验表单字段
    *
    * @param name 表单字段名称
-   * @param skip 是否跳过验证字段校验. 默认值 false
+   * @param skip 是否跳过表单字段校验. 默认值 false
    */
   validateField: (
     name: keyof T,
@@ -196,14 +207,14 @@ export interface FormInstance<T = Stores> {
    * 校验多个表单字段
    *
    * @param names 表单字段名称集合
-   * @param skip 是否跳过验证字段校验. 默认值 false
+   * @param skip 是否跳过表单字段校验. 默认值 false
    */
   validateFields: (names?: (keyof T)[], skip?: boolean) => Promise<Errors<T>>;
 
   /**
    * 重置表单字段
    *
-   * @param name 表单字段名称集合
+   * @param name 表单字段名称
    */
   resetField: (name: keyof T) => void;
 
@@ -217,12 +228,14 @@ export interface FormInstance<T = Stores> {
   /**
    * 表单提交
    *
-   * @param skip 是否跳过验证字段校验. 默认值 false
+   * @param skip 是否跳过表单字段校验. 默认值 false
    */
   submit: (skip?: boolean) => void;
 }
 
-export function formInstance<T extends {} = Stores>(formForceUpdate: Function) {
+export function formInstance<T extends {} = Stores>(
+  formForceUpdate: () => void
+) {
   const stores = {} as T;
   const initialValues = {} as T;
   const callbacks = {} as Callbacks<T>;
@@ -259,7 +272,7 @@ export function formInstance<T extends {} = Stores>(formForceUpdate: Function) {
       );
 
       setFieldError(name);
-      setFieldsValue({...stores, [name]: undefined}, true);
+      setFieldsValue({...stores, [name]: undefined});
     }
   };
 
@@ -277,7 +290,7 @@ export function formInstance<T extends {} = Stores>(formForceUpdate: Function) {
     const handleShouldUpdate = (changeName: keyof T) =>
       getFieldEntities()
         .find(({props}) => changeName === props.name && props.shouldUpdate)
-        ?.onStoreChange(changeName);
+        ?.onForceUpdate();
 
     const handleStoreChange = (
       changeName: keyof T,
@@ -286,7 +299,6 @@ export function formInstance<T extends {} = Stores>(formForceUpdate: Function) {
       setFieldTouched(changeName, true);
       onStoreChange(changeName);
       handleShouldUpdate(changeName);
-      formForceUpdate();
     };
 
     Object.assign(stores as Stores, nextStore);
@@ -296,10 +308,10 @@ export function formInstance<T extends {} = Stores>(formForceUpdate: Function) {
         const {name} = props;
 
         Object.keys(values as Stores).forEach(key => {
-          if (name === key || validate) {
+          if (name === key) {
             handleStoreChange(key as keyof T, onStoreChange);
 
-            validate && validateField().then(() => formForceUpdate());
+            validate && validateField();
           }
         });
       }
