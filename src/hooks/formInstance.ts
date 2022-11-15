@@ -4,7 +4,7 @@ import {FormItemProps} from 'src/components/FormItem';
 /**
  * 表单字段存储
  */
-export type Store = Record<string, unknown>;
+export type Stores = Record<string, unknown>;
 
 /**
  * 表单字段错误
@@ -54,7 +54,7 @@ export interface FieldEntity<T> {
 /**
  * 表单回调方法
  */
-export interface Callback<T> {
+export interface Callbacks<T> {
   /**
    * 监听表单完成
    */
@@ -74,7 +74,7 @@ export interface Callback<T> {
 /**
  * 表单实例
  */
-export interface FormInstance<T = Store> {
+export interface FormInstance<T = Stores> {
   /**
    * 获取表单字段实体
    *
@@ -114,7 +114,7 @@ export interface FormInstance<T = Store> {
   /**
    * 获取表单初始化
    */
-  getInitialValue: () => T;
+  getInitialValues: () => T;
 
   /**
    * 设置字段值
@@ -157,7 +157,7 @@ export interface FormInstance<T = Store> {
    *
    *  @param callbackValue 表单回调函数值
    */
-  setCallback: (callbackValue: Callback<T>) => void;
+  setCallbacks: (callbackValue: Callbacks<T>) => void;
 
   /**
    * 设置表单字段是否被操作
@@ -222,10 +222,10 @@ export interface FormInstance<T = Store> {
   submit: (skip?: boolean) => void;
 }
 
-export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
-  const store = {} as T;
+export function formInstance<T extends {} = Stores>(formForceUpdate: Function) {
+  const stores = {} as T;
   const initialValues = {} as T;
-  const callback = {} as Callback<T>;
+  const callbacks = {} as Callbacks<T>;
   const errors = {} as Errors<T>;
 
   let fieldEntities: FieldEntity<T>[] = [];
@@ -259,7 +259,7 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
       );
 
       setFieldError(name);
-      setFieldsValue({...store, [name]: undefined}, true);
+      setFieldsValue({...stores, [name]: undefined}, true);
     }
   };
 
@@ -273,7 +273,7 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
     ].forEach(name => unsignedField(name!));
 
   const setFieldsValue = (values: T, validate?: boolean) => {
-    const nextStore = {...store, ...values};
+    const nextStore = {...stores, ...values};
     const handleShouldUpdate = (changeName: keyof T) =>
       getFieldEntities()
         .find(({props}) => changeName === props.name && props.shouldUpdate)
@@ -289,13 +289,13 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
       formForceUpdate();
     };
 
-    Object.assign(store as Store, nextStore);
+    Object.assign(stores as Stores, nextStore);
 
     getFieldEntities(true).forEach(
       ({props, onStoreChange, validate: validateField}) => {
         const {name} = props;
 
-        Object.keys(values as Store).forEach(key => {
+        Object.keys(values as Stores).forEach(key => {
           if (name === key || validate) {
             handleStoreChange(key as keyof T, onStoreChange);
 
@@ -306,10 +306,10 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
     );
   };
 
-  const getFieldValue = (name: keyof T) => store[name];
+  const getFieldValue = (name: keyof T) => stores[name];
   const getFieldsValue = (names?: (keyof T)[]) =>
     !names
-      ? store
+      ? stores
       : (names
           .map(name => ({[name]: getFieldValue(name)}))
           .reduce((a, b) => ({...a, ...b}), {}) as T);
@@ -348,9 +348,9 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
     setFieldsValue(fieldsValue);
   };
 
-  const getInitialValue = () => initialValues;
-  const setCallback = (callbackValue: Callback<T>) => {
-    Object.assign(callback, callbackValue);
+  const getInitialValues = () => initialValues;
+  const setCallbacks = (callbackValues: Callbacks<T>) => {
+    Object.assign(callbacks, callbackValues);
   };
 
   const setFieldTouched = (name: keyof T, touched = false) => {
@@ -417,7 +417,7 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
   };
 
   const resetFields = (names?: (keyof T)[]) => {
-    const keys = Object.keys(store) as (keyof T)[];
+    const keys = Object.keys(stores) as (keyof T)[];
 
     [
       ...(names ? keys.filter(name => names.indexOf(name) !== -1) : keys),
@@ -425,7 +425,7 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
   };
 
   const submit = (skip = false) => {
-    const {onFinish, onFinishFailed} = callback;
+    const {onFinish, onFinishFailed} = callbacks;
     const handleFailed = (errs: Errors<T>) => {
       onFinishFailed?.(errs);
       formForceUpdate();
@@ -436,7 +436,7 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
       Object.entries<FieldError | undefined>(errs).filter(([, value]) => value)
         .length !== 0
         ? handleFailed(errs)
-        : onFinish?.(store)
+        : onFinish?.(stores)
     );
   };
 
@@ -446,14 +446,14 @@ export function formInstance<T extends {} = Store>(formForceUpdate: Function) {
     unsignedField,
     unsignedFields,
     setInitialValues,
-    getInitialValue,
+    getInitialValues,
     setFieldsValue,
     getFieldValue,
     getFieldsValue,
     setFieldError,
     getFieldError,
     getFieldsError,
-    setCallback,
+    setCallbacks,
     setFieldTouched,
     isFieldTouched,
     isFieldsTouched,

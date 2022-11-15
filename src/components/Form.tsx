@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react';
-import {Callback, FormInstance, Store} from '../hooks/formInstance';
+import {Callbacks, FormInstance, Stores} from '../hooks/formInstance';
 import {useForm} from '../hooks/useForm';
 import {FormContext} from '../hooks/useFormContext';
 
 /**
  * 表单 Props
  */
-export interface FormProps<T> extends Callback<T> {
+export interface FormProps<T> extends Callbacks<T> {
   /**
    * 表单实例
    */
   form?: FormInstance<T>;
 
   /**
-   * 初始化值
+   * 初始化表单值
    */
   initialValues?: T;
 
@@ -23,9 +23,9 @@ export interface FormProps<T> extends Callback<T> {
   children?: React.ReactNode;
 }
 
-export function Form<T extends {}>({
-  children,
+export function Form<T extends {} = Stores>({
   form,
+  children,
   initialValues,
   onFinish,
   onFinishFailed,
@@ -33,31 +33,27 @@ export function Form<T extends {}>({
 }: FormProps<T>) {
   const [status, setStatus] = useState('idle');
   const [formInstance] = useForm(form);
-  const {setCallback, setInitialValues} = formInstance;
+  const {setCallbacks, setInitialValues} = formInstance;
 
   useEffect(() => {
     if (status === 'idle') {
-      setCallback({onFinish, onFinishFailed, onValuesChange});
+      setCallbacks({onFinish, onFinishFailed, onValuesChange});
       setInitialValues(initialValues, status !== 'idle');
-      setStatus('succeed');
+      setStatus('succeeded');
     }
   }, [
+    status,
     initialValues,
     onFinish,
     onFinishFailed,
     onValuesChange,
-    setCallback,
+    setCallbacks,
     setInitialValues,
-    status,
   ]);
 
   return (
-    <FormContext.Provider value={formInstance as FormInstance<Store>}>
+    <FormContext.Provider value={formInstance as FormInstance<Stores>}>
       {children}
     </FormContext.Provider>
   );
 }
-
-export {useForm} from '../hooks/useForm';
-export {FormItem} from './FormItem';
-export {useFormContext} from '../hooks/useFormContext';

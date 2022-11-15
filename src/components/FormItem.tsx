@@ -3,6 +3,7 @@ import {validateRule} from '../utils/validate';
 import {useFormContext} from '../hooks/useFormContext';
 import {RuleItem} from 'async-validator';
 import {ValidateOptions} from 'src/utils/validate';
+import {Stores} from 'src/hooks/formInstance';
 
 /**
  * 表单项目 Props
@@ -10,27 +11,21 @@ import {ValidateOptions} from 'src/utils/validate';
 export interface FormItemProps<T>
   extends Pick<ValidateOptions, 'rules' | 'validateFirst'> {
   /**
-   * 名称
+   * 表单字段名称
    */
   name?: keyof T;
 
   /**
-   * 是否更新组件
-   */
-  shouldUpdate?: boolean;
-
-  /**
-   * 表单项目子级
+   * 表单项目子元素
    */
   children?: JSX.Element;
 }
 
-export function FormItem<T extends {}>({
+export function FormItem<T extends {} = Stores>({
   name,
   rules,
   children,
   validateFirst,
-  shouldUpdate = false,
 }: FormItemProps<T>) {
   const [, forceUpdate] = useState({});
   const {signInField, getFieldValue, setFieldsValue} = useFormContext<T>();
@@ -43,7 +38,7 @@ export function FormItem<T extends {}>({
 
   const setChildrenProps = () => ({
     value: name && getFieldValue(name),
-    onChange: (value: string | string[]) =>
+    onValueChange: (value: unknown) =>
       name && setFieldsValue({[name]: value} as T, true),
   });
 
@@ -64,24 +59,23 @@ export function FormItem<T extends {}>({
 
       return undefined;
     },
-    [getFieldValue, name, validateFirst]
+    [name, validateFirst, getFieldValue]
   );
 
   useEffect(() => {
     signInField({
       touched: false,
-      props: {name, rules, validateFirst, shouldUpdate},
+      props: {name, rules, validateFirst},
       onStoreChange: handleStoreChange(name),
       validate: handleValidate(rules),
     });
   }, [
-    handleStoreChange,
-    handleValidate,
     name,
     rules,
-    shouldUpdate,
-    signInField,
     validateFirst,
+    signInField,
+    handleValidate,
+    handleStoreChange,
   ]);
 
   return <>{children && React.cloneElement(children, setChildrenProps())}</>;
