@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-
 import {render} from '../test_utils';
 import {FormItem} from '../../src/components/FormItem';
 import {fireEvent} from '@testing-library/react';
@@ -8,11 +7,10 @@ import {useEffect, useState} from 'react';
 
 interface CostInputProps {
   onValueChange?: (value: string) => void;
-
   value?: string;
 }
 
-function CostInput({onValueChange, value}: CostInputProps) {
+const CostInput: React.FC<CostInputProps> = ({value, onValueChange}) => {
   const [inputValue, setInputValue] = useState('');
   const removeDollarSign = (value: string) =>
     value[0] === '$' ? value.slice(1) : value;
@@ -32,9 +30,14 @@ function CostInput({onValueChange, value}: CostInputProps) {
   }, [value]);
 
   return (
-    <input value={inputValue} aria-label="cost-input" onChange={handleChange} />
+    <input
+      value={inputValue}
+      data-cy="input"
+      aria-label="cost-input"
+      onChange={handleChange}
+    />
   );
-}
+};
 
 const setup = () => {
   const utils = render(
@@ -78,12 +81,11 @@ describe('test/components/FormItem.test.ts', () => {
             },
           ]}
         >
-          <input data-cy="input" type="text" value="" />
+          <CostInput value="" />
         </FormItem>
       </Form>
     );
 
-    expect(getByDataCy('input')).toHaveAttribute('type');
     expect(getByDataCy('input')).toHaveAttribute('value');
   });
 
