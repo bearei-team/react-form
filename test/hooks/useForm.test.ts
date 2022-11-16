@@ -7,8 +7,6 @@ describe('test/hooks/useForm.test.ts', () => {
     const {result} = renderHook(() => useForm());
     const [form] = result.current;
 
-    expect(
-      Object.entries(form).every(([, fun]) => typeof fun === 'function')
-    ).toEqual(true);
+    expect(Object.entries(form).every(([, fun]) => typeof fun === 'function')).toEqual(true);
   });
 });

@@ -4,6 +4,7 @@ import {FormItem} from '../../src/components/FormItem';
 import {fireEvent} from '@testing-library/react';
 import {Form} from '../../src/components/Form';
 import {useEffect, useState} from 'react';
+import React from 'react';
 
 interface CostInputProps {
   onValueChange?: (value: string) => void;
@@ -12,8 +13,7 @@ interface CostInputProps {
 
 const CostInput: React.FC<CostInputProps> = ({value, onValueChange}) => {
   const [inputValue, setInputValue] = useState('');
-  const removeDollarSign = (value: string) =>
-    value[0] === '$' ? value.slice(1) : value;
+  const removeDollarSign = (value: string) => (value[0] === '$' ? value.slice(1) : value);
 
   const getReturnValue = (value: string) => (value === '' ? '' : `$${value}`);
   const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,12 +30,7 @@ const CostInput: React.FC<CostInputProps> = ({value, onValueChange}) => {
   }, [value]);
 
   return (
-    <input
-      value={inputValue}
-      data-cy="input"
-      aria-label="cost-input"
-      onChange={handleChange}
-    />
+    <input value={inputValue} data-cy="input" aria-label="cost-input" onChange={handleChange} />
   );
 };
 
@@ -55,7 +50,7 @@ const setup = () => {
       >
         <CostInput />
       </FormItem>
-    </Form>
+    </Form>,
   );
 
   const input = utils.getByLabelText('cost-input') as HTMLInputElement;
@@ -83,7 +78,7 @@ describe('test/components/FormItem.test.ts', () => {
         >
           <CostInput value="" />
         </FormItem>
-      </Form>
+      </Form>,
     );
 
     expect(getByDataCy('input')).toHaveAttribute('value');

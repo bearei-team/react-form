@@ -4,37 +4,23 @@
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
-    "./node_modules/gts/"
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
+  "parser": "@typescript-eslint/parser",
   "rules": {
-    "node/no-extraneous-import": "off",
-    "node/no-unpublished-import": "off",
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "error",
-    "dot-notation": "warn",
-    "no-shadow": "off",
-    "react/prop-types": "off",
-    "react/react-in-jsx-scope": "off",
-    "react/jsx-key": ["error", {"checkFragmentShorthand": true}]
+    "@typescript-eslint/no-non-null-assertion": "off"
   },
   "parserOptions": {
     "project": ["tsconfig.json"],
+    "ecmaVersion": 6,
+    "sourceType": "module",
     "ecmaFeatures": {
-      "jsx": true
+      "jsx": true,
+      "modules": true
     }
   },
-  "plugins": ["react"],
-  "ignorePatterns": [
-    "node_modules",
-    "build",
-    "test",
-    "jest.config.js",
-    "craco.config.js",
-    "setupProxy.js",
-    "public",
-    "index.js",
-    "metro.config.js"
-  ],
+  "plugins": ["react", "@typescript-eslint"],
   "settings": {
     "react": {
       "createClass": "createReactClass", // Regex for Component Factory to use,

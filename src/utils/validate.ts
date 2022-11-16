@@ -1,9 +1,4 @@
-import Schema, {
-  RuleItem,
-  ValidateError,
-  ValidateFieldsError,
-  Values,
-} from 'async-validator';
+import Schema, {RuleItem, ValidateError, ValidateFieldsError, Values} from 'async-validator';
 
 /**
  * 校验规则选项
@@ -33,19 +28,12 @@ export interface ValidateOptions {
 const validate = ({name, value, rules = [], validateFirst}: ValidateOptions) =>
   new Schema({[name]: rules}).validate(
     {[name]: value},
-    {first: validateFirst, suppressWarning: true}
+    {first: validateFirst, suppressWarning: true},
   );
 
-export const validateRule = async ({
-  rules,
-  name,
-  value,
-  ...args
-}: ValidateOptions) => {
-  const handleErrors = (
-    errors: ValidateError[] | null,
-    fields: ValidateFieldsError | Values
-  ) => (fields[name] === value ? undefined : {errors: errors ?? [], rules});
+export const validateRule = async ({rules, name, value, ...args}: ValidateOptions) => {
+  const handleErrors = (errors: ValidateError[] | null, fields: ValidateFieldsError | Values) =>
+    fields[name] === value ? undefined : {errors: errors ?? [], rules};
 
   return validate({rules, name, value, ...args})
     .then(() => undefined)

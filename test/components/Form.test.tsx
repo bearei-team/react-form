@@ -2,6 +2,7 @@ import '@testing-library/jest-dom';
 import {render} from '../test_utils';
 import {FormItem} from '../../src/components/FormItem';
 import {Form} from '../../src/components/Form';
+import React from 'react';
 
 describe('test/components/Form.test.ts', () => {
   test('It should be a render form', () => {
@@ -18,7 +19,7 @@ describe('test/components/Form.test.ts', () => {
             <input data-cy="input-2" type="text" />
           </>
         </FormItem>
-      </Form>
+      </Form>,
     );
 
     expect(getByDataCy('input-1')).toHaveAttribute('type');

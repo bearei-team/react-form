@@ -1,5 +1,4 @@
 import {validateRule} from '../../src/utils/validate';
-import {describe, expect, test} from '@jest/globals';
 
 describe('test/utils/validate.test.ts', () => {
   test('It should be a success', async () => {

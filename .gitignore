@@ -69,7 +69,7 @@ buck-out/
 # Coverage
 coverage/
 
-# Yarn2
+# Yarn
 .pnp.*
 .yarn/*
 !.yarn/patches

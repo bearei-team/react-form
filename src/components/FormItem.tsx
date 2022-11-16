@@ -2,14 +2,14 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {validateRule} from '../utils/validate';
 import {useFormContext} from '../hooks/useFormContext';
 import {RuleItem} from 'async-validator';
-import {ValidateOptions} from 'src/utils/validate';
-import {Stores} from 'src/hooks/formInstance';
+import {ValidateOptions} from '../utils/validate';
+import {Stores} from '../hooks/formInstance';
 
 /**
  * 表单项目 Props
  */
 export interface FormItemProps<T>
-  extends Pick<ValidateOptions, 'rules' | 'validateFirst'> {
+  extends Partial<Pick<ValidateOptions, 'rules' | 'validateFirst'>> {
   /**
    * 表单字段名称
    */
@@ -26,7 +26,7 @@ export interface FormItemProps<T>
   shouldUpdate?: boolean;
 }
 
-export function FormItem<T extends {} = Stores>({
+export function FormItem<T extends Stores = Stores>({
   name,
   rules,
   children,
@@ -39,14 +39,13 @@ export function FormItem<T extends {} = Stores>({
     (name?: keyof T) => (changeName?: keyof T) => {
       name === changeName && handleForceUpdate();
     },
-    []
+    [],
   );
 
   const handleForceUpdate = () => forceUpdate({});
   const setChildrenProps = () => ({
     value: name && getFieldValue(name),
-    onValueChange: (value: unknown) =>
-      name && setFieldsValue({[name]: value} as T, true),
+    onValueChange: (value: unknown) => name && setFieldsValue({[name]: value} as T, true),
   });
 
   const handleValidate = useCallback(
@@ -59,14 +58,14 @@ export function FormItem<T extends {} = Stores>({
         return validateRule({
           name: name as string,
           value,
-          rules: rules!,
+          rules,
           validateFirst,
         });
       }
 
       return undefined;
     },
-    [name, validateFirst, getFieldValue]
+    [name, validateFirst, getFieldValue],
   );
 
   useEffect(() => {
@@ -77,15 +76,7 @@ export function FormItem<T extends {} = Stores>({
       onForceUpdate: handleForceUpdate,
       validate: handleValidate(rules),
     });
-  }, [
-    name,
-    rules,
-    shouldUpdate,
-    validateFirst,
-    signInField,
-    handleValidate,
-    handleStoreChange,
-  ]);
+  }, [name, rules, shouldUpdate, validateFirst, signInField, handleValidate, handleStoreChange]);
 
   return <>{children && React.cloneElement(children, setChildrenProps())}</>;
 }

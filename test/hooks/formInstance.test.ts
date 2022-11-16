@@ -37,9 +37,7 @@ describe('test/hooks/formInstance.test.ts', () => {
   test('It should be getting an instance of the form', () => {
     const from = formInstance(() => {});
 
-    expect(
-      Object.entries(from).every(([, fun]) => typeof fun === 'function')
-    ).toEqual(true);
+    expect(Object.entries(from).every(([, fun]) => typeof fun === 'function')).toEqual(true);
   });
 
   test('It should be a sign in field entity', async () => {
@@ -50,9 +48,7 @@ describe('test/hooks/formInstance.test.ts', () => {
     const fieldEntities = from.getFieldEntities();
 
     expect(
-      fieldEntities.every(
-        ({props, touched}) => names.indexOf(props.name!) !== -1 && !touched
-      )
+      fieldEntities.every(({props, touched}) => names.indexOf(props.name!) !== -1 && !touched),
     ).toEqual(true);
   });
 
@@ -62,26 +58,20 @@ describe('test/hooks/formInstance.test.ts', () => {
     signInField(from);
 
     from.unsignedField('code');
-    expect(
-      !from.getFieldEntities().find(({props}) => props.name === 'code')
-    ).toEqual(true);
+    expect(!from.getFieldEntities().find(({props}) => props.name === 'code')).toEqual(true);
 
     expect(from.getFieldValue('code')).toEqual(undefined);
     expect(from.getFieldError('code')).toEqual(undefined);
 
     from.unsignedFields(['name']);
     expect(
-      !from
-        .getFieldEntities()
-        .find(({props}) => ['name', 'code'].indexOf(props.name!) !== -1)
+      !from.getFieldEntities().find(({props}) => ['name', 'code'].indexOf(props.name!) !== -1),
     ).toEqual(true);
 
     from.unsignedFields();
-    expect(
-      !from
-        .getFieldEntities()
-        .find(({props}) => names.indexOf(props.name!) !== -1)
-    ).toEqual(true);
+    expect(!from.getFieldEntities().find(({props}) => names.indexOf(props.name!) !== -1)).toEqual(
+      true,
+    );
   });
 
   test('It should be setting the initialization value', async () => {
@@ -96,16 +86,13 @@ describe('test/hooks/formInstance.test.ts', () => {
 
     const valueKeys = Object.keys(from.getFieldsValue(['name', 'password']));
     expect(
-      valueKeys.length === 2 &&
-        valueKeys.every(key => key === 'name' || key === 'password')
+      valueKeys.length === 2 && valueKeys.every(key => key === 'name' || key === 'password'),
     ).toEqual(true);
 
     const allValues = from.getInitialValues();
 
     expect(
-      Object.entries(allValues).every(
-        ([, value]) => names.indexOf(`${value}`) !== -1
-      )
+      Object.entries(allValues).every(([, value]) => names.indexOf(`${value}`) !== -1),
     ).toEqual(true);
   });
 
@@ -123,23 +110,16 @@ describe('test/hooks/formInstance.test.ts', () => {
     from.setFieldError('password', error);
     from.setFieldError('code', error);
 
-    expect(from.getFieldError('name')?.errors[0].field === 'field').toEqual(
-      true
-    );
+    expect(from.getFieldError('name')?.errors[0].field === 'field').toEqual(true);
 
-    expect(
-      from.getFieldError('password')?.errors[0].message === 'message'
-    ).toEqual(true);
+    expect(from.getFieldError('password')?.errors[0].message === 'message').toEqual(true);
 
-    expect(
-      from.getFieldError('code')?.errors[0].fieldValue === 'fieldValue'
-    ).toEqual(true);
+    expect(from.getFieldError('code')?.errors[0].fieldValue === 'fieldValue').toEqual(true);
 
     expect(
       Object.entries(from.getFieldsError()).every(
-        ([, value]) =>
-          value?.errors[0].field === 'field' && value.rules?.length === 1
-      )
+        ([, value]) => value?.errors[0].field === 'field' && value.rules?.length === 1,
+      ),
     );
   });
 
@@ -181,33 +161,29 @@ describe('test/hooks/formInstance.test.ts', () => {
 
     signInField(from);
 
-    from
-      .validateField('name')
-      .then(result => expect(result?.errors.length !== 0).toEqual(true));
+    from.validateField('name').then(result => expect(result?.errors.length !== 0).toEqual(true));
 
     from
       .validateField('password')
       .then(result => expect(result?.errors.length !== 0).toEqual(true));
 
-    from
-      .validateField('code')
-      .then(result => expect(result?.errors.length !== 0).toEqual(true));
+    from.validateField('code').then(result => expect(result?.errors.length !== 0).toEqual(true));
 
     from.validateFields(['name', 'password']).then(result => {
       expect(
         Object.entries(result).every(
           ([key, value]) =>
             ['name', 'password'].indexOf(key) !== -1 &&
-            ['name', 'password'].indexOf(value?.errors[0].field!) !== -1
-        )
+            ['name', 'password'].indexOf(value?.errors[0].field!) !== -1,
+        ),
       );
 
       expect(
         Object.entries(from.getFieldsError(['name', 'password'])).every(
           ([key, value]) =>
             ['name', 'password'].indexOf(key) !== -1 &&
-            ['name', 'password'].indexOf(value?.errors[0]?.field!) !== -1
-        )
+            ['name', 'password'].indexOf(value?.errors[0]?.field!) !== -1,
+        ),
       );
     });
 
@@ -215,17 +191,15 @@ describe('test/hooks/formInstance.test.ts', () => {
       expect(
         Object.entries(result).every(
           ([key, value]) =>
-            names.indexOf(key) !== -1 &&
-            names.indexOf(value?.errors[0]?.field!) !== -1
-        )
+            names.indexOf(key) !== -1 && names.indexOf(value?.errors[0]?.field!) !== -1,
+        ),
       );
 
       expect(
         Object.entries(from.getFieldsError()).every(
           ([key, value]) =>
-            names.indexOf(key) !== -1 &&
-            names.indexOf(value?.errors[0]?.field!) !== -1
-        )
+            names.indexOf(key) !== -1 && names.indexOf(value?.errors[0]?.field!) !== -1,
+        ),
       );
     });
   });
@@ -244,13 +218,9 @@ describe('test/hooks/formInstance.test.ts', () => {
 
     from.validateFields();
     from.resetFields();
-    expect(
-      Object.entries(from.getFieldsValue()).filter(([, value]) => value).length
-    ).toEqual(0);
+    expect(Object.entries(from.getFieldsValue()).filter(([, value]) => value).length).toEqual(0);
 
-    expect(
-      Object.entries(from.getFieldsError()).filter(([, value]) => value).length
-    ).toEqual(0);
+    expect(Object.entries(from.getFieldsError()).filter(([, value]) => value).length).toEqual(0);
   });
 
   test('It should be submitted', async () => {
@@ -263,9 +233,7 @@ describe('test/hooks/formInstance.test.ts', () => {
         expect(typeof values !== 'undefined').toEqual(true);
       },
       onFinishFailed: errs => {
-        expect(
-          Object.entries(errs).filter(([, value]) => value).length
-        ).toEqual(3);
+        expect(Object.entries(errs).filter(([, value]) => value).length).toEqual(3);
       },
     });
 

@@ -23,7 +23,7 @@ export interface FormProps<T> extends Callbacks<T> {
   children?: React.ReactNode;
 }
 
-export function Form<T extends {} = Stores>({
+export function Form<T extends Stores = Stores>({
   form,
   children,
   initialValues,

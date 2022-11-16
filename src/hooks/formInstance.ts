@@ -1,5 +1,5 @@
 import {RuleItem, ValidateError} from 'async-validator';
-import {FormItemProps} from 'src/components/FormItem';
+import {FormItemProps} from '../components/FormItem';
 
 /**
  * 表单字段储存
@@ -198,10 +198,7 @@ export interface FormInstance<T = Stores> {
    * @param name 表单字段名称
    * @param skip 是否跳过表单字段校验. 默认值 false
    */
-  validateField: (
-    name: keyof T,
-    skip?: boolean
-  ) => Promise<FieldError | undefined>;
+  validateField: (name: keyof T, skip?: boolean) => Promise<FieldError | undefined>;
 
   /**
    * 校验多个表单字段
@@ -233,9 +230,7 @@ export interface FormInstance<T = Stores> {
   submit: (skip?: boolean) => void;
 }
 
-export function formInstance<T extends {} = Stores>(
-  formForceUpdate: () => void
-) {
+export function formInstance<T extends Stores = Stores>(formForceUpdate: () => void) {
   const stores = {} as T;
   const initialValues = {} as T;
   const callbacks = {} as Callbacks<T>;
@@ -244,9 +239,7 @@ export function formInstance<T extends {} = Stores>(
   let fieldEntities: FieldEntity<T>[] = [];
 
   const getFieldEntities = (unsigned = false) =>
-    !unsigned
-      ? fieldEntities
-      : fieldEntities.filter(fieldEntity => fieldEntity.props.name);
+    !unsigned ? fieldEntities : fieldEntities.filter(fieldEntity => fieldEntity.props.name);
 
   const signInField = (entity: FieldEntity<T>) => {
     const {name} = entity.props;
@@ -262,14 +255,10 @@ export function formInstance<T extends {} = Stores>(
 
   const unsignedField = (name: keyof T) => {
     const currentFieldEntities = getFieldEntities();
-    const fieldEntity = currentFieldEntities.find(
-      ({props}) => props.name === name
-    );
+    const fieldEntity = currentFieldEntities.find(({props}) => props.name === name);
 
     if (fieldEntity) {
-      fieldEntities = currentFieldEntities.filter(
-        ({props}) => props.name !== name
-      );
+      fieldEntities = currentFieldEntities.filter(({props}) => props.name !== name);
 
       setFieldError(name);
       setFieldsValue({...stores, [name]: undefined});
@@ -277,9 +266,9 @@ export function formInstance<T extends {} = Stores>(
   };
 
   const unsignedFields = (names?: (keyof T)[]) =>
-    [
-      ...(names ? names : getFieldEntities(true).map(({props}) => props.name)),
-    ].forEach(name => unsignedField(name!));
+    [...(names ? names : getFieldEntities(true).map(({props}) => props.name))].forEach(name =>
+      unsignedField(name!),
+    );
 
   const setFieldsValue = (values: T, validate?: boolean) => {
     const nextStore = {...stores, ...values};
@@ -288,10 +277,7 @@ export function formInstance<T extends {} = Stores>(
         .find(({props}) => changeName === props.name && props.shouldUpdate)
         ?.onForceUpdate();
 
-    const handleStoreChange = (
-      changeName: keyof T,
-      onStoreChange: (name: keyof T) => void
-    ) => {
+    const handleStoreChange = (changeName: keyof T, onStoreChange: (name: keyof T) => void) => {
       setFieldTouched(changeName, true);
       onStoreChange(changeName);
       handleShouldUpdate(changeName);
@@ -299,19 +285,17 @@ export function formInstance<T extends {} = Stores>(
 
     Object.assign(stores as Stores, nextStore);
 
-    getFieldEntities(true).forEach(
-      ({props, onStoreChange, validate: validateField}) => {
-        const {name} = props;
+    getFieldEntities(true).forEach(({props, onStoreChange, validate: validateField}) => {
+      const {name} = props;
 
-        Object.keys(values as Stores).forEach(key => {
-          if (name === key) {
-            handleStoreChange(key as keyof T, onStoreChange);
+      Object.keys(values as Stores).forEach(key => {
+        if (name === key) {
+          handleStoreChange(key as keyof T, onStoreChange);
 
-            validate && validateField();
-          }
-        });
-      }
-    );
+          validate && validateField();
+        }
+      });
+    });
   };
 
   const getFieldValue = (name: keyof T) => stores[name];
@@ -330,11 +314,7 @@ export function formInstance<T extends {} = Stores>(
   const getFieldsError = (names?: (keyof T)[]) => {
     const errs = Object.entries<FieldError | undefined>(errors);
 
-    return [
-      ...(names
-        ? errs.filter(([name]) => names.indexOf(name as keyof T) !== -1)
-        : errs),
-    ]
+    return [...(names ? errs.filter(([name]) => names.indexOf(name as keyof T) !== -1) : errs)]
       .map(([name, errs]) => ({[name]: errs}))
       .flat()
       .reduce((a, b) => ({...a, ...b}), {}) as Errors<T>;
@@ -364,9 +344,7 @@ export function formInstance<T extends {} = Stores>(
   const setFieldTouched = (name: keyof T, touched = false) => {
     fieldEntities = [
       ...getFieldEntities().map(fieldEntity =>
-        fieldEntity.props.name === name
-          ? {...fieldEntity, touched}
-          : fieldEntity
+        fieldEntity.props.name === name ? {...fieldEntity, touched} : fieldEntity,
       ),
     ];
   };
@@ -413,7 +391,7 @@ export function formInstance<T extends {} = Stores>(
         ? names.map(name => validateField(name, skip))
         : getFieldEntities(true)
             .filter(({props}) => props.name)
-            .map(({props}) => validateField(props.name!, skip))
+            .map(({props}) => validateField(props.name!, skip)),
     );
 
     return handleFieldErrors(fieldErrors);
@@ -427,9 +405,7 @@ export function formInstance<T extends {} = Stores>(
   const resetFields = (names?: (keyof T)[]) => {
     const keys = Object.keys(stores) as (keyof T)[];
 
-    [
-      ...(names ? keys.filter(name => names.indexOf(name) !== -1) : keys),
-    ].forEach(resetField);
+    [...(names ? keys.filter(name => names.indexOf(name) !== -1) : keys)].forEach(resetField);
   };
 
   const submit = (skip = false) => {
@@ -441,10 +417,9 @@ export function formInstance<T extends {} = Stores>(
 
     validateFields(undefined, skip).then(errs =>
       onFinish &&
-      Object.entries<FieldError | undefined>(errs).filter(([, value]) => value)
-        .length !== 0
+      Object.entries<FieldError | undefined>(errs).filter(([, value]) => value).length !== 0
         ? handleFailed(errs)
-        : onFinish?.(stores)
+        : onFinish?.(stores),
     );
   };
 
