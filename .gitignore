@@ -77,3 +77,7 @@ coverage/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Build
+lib/
+lib-esm/

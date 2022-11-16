@@ -3,25 +3,29 @@ import TerserPlugin from 'terser-webpack-plugin';
 import * as path from 'path';
 import * as webpack from 'webpack';
 // in case you run into any typescript error when configuring `devServer`
-// import 'webpack-dev-server';
+import 'webpack-dev-server';
 
 const config: webpack.Configuration = {
   mode: 'production',
   entry: {
     index: path.resolve(__dirname, './src/index.ts'),
-    //   components: path.resolve(__dirname, './src/components'),
-    // hooks: path.resolve(__dirname, './src/hooks'),
-    // utils: path.resolve(__dirname, './src/utils'),
+    Form: path.resolve(__dirname, './src/components/Form.tsx'),
+    FormItem: path.resolve(__dirname, './src/components/FormItem.tsx'),
+    formInstance: path.resolve(__dirname, './src/hooks/formInstance.ts'),
+    useForm: path.resolve(__dirname, './src/hooks/useForm.tsx'),
+    useFormContext: path.resolve(__dirname, './src/hooks/useFormContext.tsx'),
+    validate: path.resolve(__dirname, './src/utils/validate.ts'),
   },
   output: {
-    path: path.resolve(__dirname, './build'),
+    path: path.resolve(__dirname, './lib'),
     filename: '[name].js',
-    publicPath: './build/',
+    publicPath: './lib/',
     libraryTarget: 'commonjs2',
   },
+  devtool: 'source-map',
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin()],
+    minimizer: [new TerserPlugin({include: /\.min\.js$/})],
   },
   module: {
     rules: [
@@ -34,14 +38,19 @@ const config: webpack.Configuration = {
               presets: ['@babel/preset-env', '@babel/preset-react'],
             },
           },
-          {loader: 'ts-loader'},
+          {
+            loader: 'ts-loader',
+            options: {
+              configFile: process.env.TS_NODE_PROJECT,
+            },
+          },
         ],
         include: path.resolve(__dirname, './src/'),
       },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.tsx'],
+    extensions: ['.ts', '.tsx', '.js'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
