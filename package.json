@@ -1,6 +1,6 @@
 {
   "name": "@bearei/react-form",
-  "version": "0.0.3",
+  "version": "0.0.9",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "module": "./lib-esm/index.js",
@@ -30,7 +30,6 @@
     "@babel/core": "^7.20.2",
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-react": "^7.18.6",
-    "@bearei/react-dropdown": "^0.0.13",
     "@bearei/react-input": "^0.0.19",
     "@bearei/react-menu": "^0.0.19",
     "@testing-library/dom": "^8.19.0",
@@ -88,10 +87,10 @@
     "build:cjs": "cross-env TS_NODE_PROJECT=\"tsconfig.cjs.json\" LIBRARY=\"commonjs\" webpack --progress",
     "clean": "shx rm -rf lib-esm lib",
     "test": "jest --watchAll --detectOpenHandles",
-    "coverage": "yarn test --coverage",
+    "coverage": "yarn jest --coverage",
     "lint": "eslint . --ext .jsx,.ts,.tsx",
     "fix": "yarn lint --fix",
-    "publish": "yarn build && yarn npm publish --access public"
+    "publish": "yarn lint && yarn coverage && yarn build && yarn npm publish --access public"
   },
   "engines": {
     "node": ">=16.0.0"

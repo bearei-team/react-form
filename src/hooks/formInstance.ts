@@ -1,7 +1,7 @@
 import handleNamePath, {NamePath} from '../utils/namePath';
 import {ValidateError} from 'async-validator';
 import {ValidateOptions} from '..';
-import {FormItemProps} from '../components/FormItem';
+import {BaseFormItemProps} from '../components/FormItem';
 
 /**
  * Form fields are stored
@@ -31,7 +31,7 @@ export interface FieldEntity<T> {
    */
   validate: () => Promise<FieldError | undefined>;
 
-  props: FormItemProps<HTMLElement, T>;
+  props: BaseFormItemProps<HTMLElement, T>;
 
   /**
    * Whether an action has taken place in the current form field

@@ -18,8 +18,8 @@ Base form components that support React and React native
 | onFinish | `(options: OnFinishOptions) => void` | ✘ | This function is called when the form is completed |
 | onFinishFailed | `(options: Errors) => void` | ✘ | This function is called when the form fails to complete |
 | onValuesChange | `(changedValues: Record<string, unknown>, values: Record<string, unknown>) => void` | ✘ | This function is called when the form field value changes |
-| renderMain | `(props: FormMainProps) => ReactNode` | ✘ | Render the form main |
-| renderContainer | `(props: FormContainerProps) => ReactNode` | ✘ | Render the form container |
+| renderMain | `(props: FormMainProps) => ReactNode` | ✔ | Render the form main |
+| renderContainer | `(props: FormContainerProps) => ReactNode` | ✔ | Render the form container |
 
 #### Form Item
 
@@ -33,6 +33,10 @@ Base form components that support React and React native
 | required | `boolean` | ✘ | Whether the form entry is a required field |
 | rules | `RuleItem[]` | ✘ | Validate rules -- [RuleItem](https://github.com/yiminghe/async-validator) |
 | validateFirst | `boolean` | ✘ | When a rule fails, do you stop checking the rest of the rules |
+| renderLabel | `(props: FormItemLabelProps) => ReactNode` | ✘ | Render the form item label |
+| renderExtra | `(props: FormItemExtraProps) => ReactNode` | ✘ | Render the form item extra |
+| renderMain | `(props: FormItemMainProps) => ReactNode` | ✔ | Render the form item main |
+| renderContainer | `(props: FormItemContainerProps) => ReactNode` | ✔ | Render the form item container |
 
 ## Api
 
