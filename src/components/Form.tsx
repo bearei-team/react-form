@@ -1,13 +1,23 @@
-import {ReactNode, Ref, useEffect, useId, useState} from 'react';
+import {
+  DetailedHTMLProps,
+  FormHTMLAttributes,
+  ReactNode,
+  Ref,
+  useEffect,
+  useId,
+  useState,
+} from 'react';
 import {Callbacks, FormInstance, Stores} from '../hooks/formInstance';
 import useForm from '../hooks/useForm';
 import {FormContext} from '../hooks/useFormContext';
 import FormItem, {BaseFormItemProps} from './FormItem';
+import type {ViewProps} from 'react-native';
 
 /**
  * Base form props
  */
-export interface BaseFormProps<T, F = Stores> extends Callbacks<F> {
+export interface BaseFormProps<T = HTMLFormElement, F = Stores>
+  extends Partial<DetailedHTMLProps<FormHTMLAttributes<T>, T> & ViewProps & Callbacks<F>> {
   /**
    * Custom ref
    */
@@ -36,12 +46,12 @@ export interface FormProps<T, F = Stores> extends BaseFormProps<T, F> {
   /**
    * Render the form main
    */
-  renderMain?: (props: FormMainProps<T, F>) => ReactNode;
+  renderMain: (props: FormMainProps<T, F>) => ReactNode;
 
   /**
    * Render the form container
    */
-  renderContainer?: (props: FormContainerProps<T, F>) => ReactNode;
+  renderContainer: (props: FormContainerProps<T, F>) => ReactNode;
 }
 
 export interface FormChildrenProps<T, F> extends Omit<BaseFormProps<T, F>, 'ref'> {
@@ -52,12 +62,12 @@ export interface FormChildrenProps<T, F> extends Omit<BaseFormProps<T, F>, 'ref'
   children?: ReactNode;
 }
 
-export type FormMainProps<T, F> = FormChildrenProps<T, F>;
-export type FormContainerProps<T, F> = FormChildrenProps<T, F> & Pick<BaseFormProps<T>, 'ref'>;
+export type FormMainProps<T, F> = FormChildrenProps<T, F> & Pick<BaseFormProps<T>, 'ref'>;
+export type FormContainerProps<T, F> = FormChildrenProps<T, F>;
 
 export type FormType = typeof Form & {Item: typeof FormItem};
 
-const Form = <T extends HTMLElement, F extends Stores>({
+const Form = <T extends HTMLFormElement, F extends Stores>({
   ref,
   form,
   initialValues,
@@ -90,15 +100,10 @@ const Form = <T extends HTMLElement, F extends Stores>({
     status,
   ]);
 
-  const main = renderMain?.({
+  const main = renderMain({...childrenProps, ref});
+  const container = renderContainer({
     ...childrenProps,
-  });
-
-  const content = <>{main}</>;
-  const container = renderContainer?.({
-    ...childrenProps,
-    children: content,
-    ref,
+    children: main,
   });
 
   return (

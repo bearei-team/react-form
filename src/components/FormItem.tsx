@@ -1,14 +1,28 @@
 import {RuleItem} from 'async-validator';
-import {ReactNode, Ref, useCallback, useEffect, useId, useState} from 'react';
+import {
+  DetailedHTMLProps,
+  HTMLAttributes,
+  ReactNode,
+  Ref,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from 'react';
 import {Stores} from '../hooks/formInstance';
 import useFormContext from '../hooks/useFormContext';
 import validateRule, {ValidateOptions} from '../utils/validate';
+import type {ViewProps} from 'react-native';
 
 /**
  * Base form item props
  */
 export interface BaseFormItemProps<T = HTMLElement, F = Stores>
-  extends Partial<Pick<ValidateOptions, 'rules' | 'validateFirst'>> {
+  extends Partial<
+    DetailedHTMLProps<HTMLAttributes<T>, T> &
+      ViewProps &
+      Pick<ValidateOptions, 'rules' | 'validateFirst'>
+  > {
   /**
    * Custom ref
    */
@@ -56,14 +70,24 @@ export interface BaseFormItemProps<T = HTMLElement, F = Stores>
  */
 export interface FormItemProps<T, F> extends BaseFormItemProps<T, F> {
   /**
+   * Render the form item label
+   */
+  renderLabel?: (props: FormItemLabelProps<T, F>) => ReactNode;
+
+  /**
+   * Render the form item extra
+   */
+  renderExtra?: (props: FormItemExtraProps<T, F>) => ReactNode;
+
+  /**
    * Render the form item main
    */
-  renderMain?: (props: FormItemMainProps<T, F>) => ReactNode;
+  renderMain: (props: FormItemMainProps<T, F>) => ReactNode;
 
   /**
    * Render the form item container
    */
-  renderContainer?: (props: FormItemContainerProps<T, F>) => ReactNode;
+  renderContainer: (props: FormItemContainerProps<T, F>) => ReactNode;
 }
 
 export interface FormItemChildrenProps<T, F> extends Omit<BaseFormItemProps<T, F>, 'ref'> {
@@ -84,6 +108,8 @@ export interface FormItemChildrenProps<T, F> extends Omit<BaseFormItemProps<T, F
   onValueChange?: (value?: unknown) => void;
 }
 
+export type FormItemLabelProps<T, F> = FormItemChildrenProps<T, F>;
+export type FormItemExtraProps<T, F> = FormItemChildrenProps<T, F>;
 export type FormItemMainProps<T, F> = FormItemChildrenProps<T, F> &
   Pick<BaseFormItemProps<T>, 'ref'>;
 
@@ -95,6 +121,11 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
   rules,
   validateFirst,
   shouldUpdate,
+  label,
+  extra,
+  required,
+  renderLabel,
+  renderExtra,
   renderMain,
   renderContainer,
   ...args
@@ -102,8 +133,14 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
   const id = useId();
   const [status, setStatus] = useState('idle');
   const [, forceUpdate] = useState({});
-  const {signInField, getFieldValue, setFieldsValue} = useFormContext<F>();
-  const childrenProps = {...args, id};
+  const {signInField, getFieldValue, setFieldsValue, getFieldError} = useFormContext<F>();
+  const errorMessage = name && getFieldError(name)?.errors[0].message;
+  const childrenProps = {
+    ...args,
+    required: typeof required === 'boolean' ? required : rules?.some(({required}) => required),
+    id,
+  };
+
   const handleStoreChange = useCallback(
     (name?: keyof F) => (changeName?: keyof F) => {
       name === changeName && forceUpdate({});
@@ -158,17 +195,29 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
     validateFirst,
   ]);
 
-  const main = renderMain?.({
+  const labelNode =
+    label &&
+    renderLabel?.({
+      ...childrenProps,
+      children: label,
+    });
+
+  const extraNode =
+    extra &&
+    renderExtra?.({
+      ...childrenProps,
+      children: errorMessage ?? extra,
+    });
+
+  const main = renderMain({
     ...childrenProps,
     ...handleChildrenProps(),
+    label: labelNode,
+    extra: extraNode,
     ref,
   });
 
-  const content = <>{main}</>;
-  const container = renderContainer?.({
-    ...childrenProps,
-    children: content,
-  });
+  const container = renderContainer({...childrenProps, children: main});
 
   return <>{container}</>;
 };
