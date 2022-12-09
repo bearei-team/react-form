@@ -1,7 +1,7 @@
 import {useRef, useState} from 'react';
-import {FormInstance, formInstance, Stores} from './formInstance';
+import formInstance, {FormInstance, Stores} from './formInstance';
 
-export function useForm<T extends Stores>(form?: FormInstance<T>) {
+const useForm = <T extends Stores>(form?: FormInstance<T>) => {
   const formRef = useRef<FormInstance<T>>();
   const [, forceUpdate] = useState({});
   const handleForceUpdate = () => forceUpdate({});
@@ -11,4 +11,6 @@ export function useForm<T extends Stores>(form?: FormInstance<T>) {
   }
 
   return [formRef.current];
-}
+};
+
+export default useForm;

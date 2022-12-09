@@ -1,28 +1,31 @@
 import TerserPlugin from 'terser-webpack-plugin';
-
 import * as path from 'path';
 import * as webpack from 'webpack';
+import * as glob from 'glob';
+import {config as webpackCJSConfig} from './webpack.config.cjs';
+import {config as webpackESMConfig} from './webpack.config.esm';
 // in case you run into any typescript error when configuring `devServer`
 import 'webpack-dev-server';
 
+const getEntries = () => {
+  const map = {};
+  const entryFiles = glob.sync('./src/**/*.{ts,tsx}');
+
+  entryFiles.forEach(filepath => {
+    let fileDir = /.\/src\/(.*?)\.(ts|tsx)$/i.exec(filepath);
+
+    fileDir && Object.assign(map, {[fileDir[1]]: path.resolve(__dirname, filepath)});
+  });
+
+  return map;
+};
+
+const webpackConfig = process.env.LIBRARY === 'module' ? webpackESMConfig : webpackCJSConfig;
+const mode = process.env.MODE as webpack.Configuration['mode'];
 const config: webpack.Configuration = {
-  mode: 'production',
-  entry: {
-    index: path.resolve(__dirname, './src/index.ts'),
-    Form: path.resolve(__dirname, './src/components/Form.tsx'),
-    FormItem: path.resolve(__dirname, './src/components/FormItem.tsx'),
-    formInstance: path.resolve(__dirname, './src/hooks/formInstance.ts'),
-    useForm: path.resolve(__dirname, './src/hooks/useForm.tsx'),
-    useFormContext: path.resolve(__dirname, './src/hooks/useFormContext.tsx'),
-    validate: path.resolve(__dirname, './src/utils/validate.ts'),
-  },
-  output: {
-    path: path.resolve(__dirname, './lib'),
-    filename: '[name].js',
-    publicPath: './lib/',
-    libraryTarget: 'commonjs2',
-  },
-  devtool: 'source-map',
+  mode,
+  entry: getEntries(),
+  devtool: mode === 'development' ? 'source-map' : false,
   optimization: {
     minimize: true,
     minimizer: [new TerserPlugin({include: /\.min\.js$/})],
@@ -55,9 +58,7 @@ const config: webpack.Configuration = {
       '@': path.resolve(__dirname, 'src'),
     },
   },
-  externals: {
-    react: 'react',
-  },
+  ...webpackConfig,
 };
 
 export default config;

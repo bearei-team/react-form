@@ -1,4 +1,4 @@
-import {validateRule} from '../../src/utils/validate';
+import validateRule from '../../src/utils/validate';
 
 describe('test/utils/validate.test.ts', () => {
   test('It should be a success', async () => {

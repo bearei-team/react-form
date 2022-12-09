@@ -1,51 +1,119 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {validateRule} from '../utils/validate';
-import {useFormContext} from '../hooks/useFormContext';
 import {RuleItem} from 'async-validator';
-import {ValidateOptions} from '../utils/validate';
+import {ReactNode, Ref, useCallback, useEffect, useId, useState} from 'react';
 import {Stores} from '../hooks/formInstance';
+import useFormContext from '../hooks/useFormContext';
+import validateRule, {ValidateOptions} from '../utils/validate';
 
 /**
- * 表单项目 Props
+ * Base form item props
  */
-export interface FormItemProps<T>
+export interface BaseFormItemProps<T = HTMLElement, F = Stores>
   extends Partial<Pick<ValidateOptions, 'rules' | 'validateFirst'>> {
   /**
-   * 表单字段名称
+   * Custom ref
    */
-  name?: keyof T;
+  ref?: Ref<T>;
 
   /**
-   * 表单项目子元素
+   * Form item field name
    */
-  children?: JSX.Element;
+  name?: keyof F;
 
   /**
-   * 表单项目是否应该更新
+   * Form item label
+   */
+  label?: ReactNode;
+
+  /**
+   * Whether the form item is unstyled
+   */
+  noStyle?: boolean;
+
+  /**
+   * The initial value of the form item
+   */
+  initialValue?: unknown;
+
+  /***
+   * Additional content for the form item
+   */
+  extra?: ReactNode;
+
+  /**
+   * Whether the form entry is a required field
+   */
+  required?: boolean;
+
+  /**
+   * TODO:
+   * Whether the form item should be updated
    */
   shouldUpdate?: boolean;
 }
 
-export function FormItem<T extends Stores = Stores>({
+/**
+ * Form item props
+ */
+export interface FormItemProps<T, F> extends BaseFormItemProps<T, F> {
+  /**
+   * Render the form item main
+   */
+  renderMain?: (props: FormItemMainProps<T, F>) => ReactNode;
+
+  /**
+   * Render the form item container
+   */
+  renderContainer?: (props: FormItemContainerProps<T, F>) => ReactNode;
+}
+
+export interface FormItemChildrenProps<T, F> extends Omit<BaseFormItemProps<T, F>, 'ref'> {
+  /**
+   * Component unique ID
+   */
+  id: string;
+  children?: ReactNode;
+
+  /**
+   * Form item value
+   */
+  value?: unknown;
+
+  /**
+   * This function is called when the value of the form option changes
+   */
+  onValueChange?: (value?: unknown) => void;
+}
+
+export type FormItemMainProps<T, F> = FormItemChildrenProps<T, F> &
+  Pick<BaseFormItemProps<T>, 'ref'>;
+
+export type FormItemContainerProps<T, F> = FormItemChildrenProps<T, F>;
+
+const FormItem = <T extends HTMLElement, F extends Stores>({
+  ref,
   name,
   rules,
-  children,
   validateFirst,
-  shouldUpdate = false,
-}: FormItemProps<T>) {
+  shouldUpdate,
+  renderMain,
+  renderContainer,
+  ...args
+}: FormItemProps<T, F>) => {
+  const id = useId();
+  const [status, setStatus] = useState('idle');
   const [, forceUpdate] = useState({});
-  const {signInField, getFieldValue, setFieldsValue} = useFormContext<T>();
+  const {signInField, getFieldValue, setFieldsValue} = useFormContext<F>();
+  const childrenProps = {...args, id};
   const handleStoreChange = useCallback(
-    (name?: keyof T) => (changeName?: keyof T) => {
-      name === changeName && handleForceUpdate();
+    (name?: keyof F) => (changeName?: keyof F) => {
+      name === changeName && forceUpdate({});
     },
     [],
   );
 
-  const handleForceUpdate = () => forceUpdate({});
-  const setChildrenProps = () => ({
+  const handleChildrenProps = () => ({
     value: name && getFieldValue(name),
-    onValueChange: (value: unknown) => name && setFieldsValue({[name]: value} as T, true),
+    onValueChange: (value?: unknown) => name && setFieldsValue({[name]: value} as F),
   });
 
   const handleValidate = useCallback(
@@ -65,18 +133,44 @@ export function FormItem<T extends Stores = Stores>({
 
       return undefined;
     },
-    [name, validateFirst, getFieldValue],
+    [getFieldValue, name, validateFirst],
   );
 
   useEffect(() => {
-    signInField({
-      touched: false,
-      props: {name, rules, validateFirst, shouldUpdate},
-      onStoreChange: handleStoreChange(name),
-      onForceUpdate: handleForceUpdate,
-      validate: handleValidate(rules),
-    });
-  }, [name, rules, shouldUpdate, validateFirst, signInField, handleValidate, handleStoreChange]);
+    if (status === 'idle') {
+      signInField({
+        touched: false,
+        props: {name, rules, validateFirst, shouldUpdate},
+        onStoreChange: handleStoreChange(name),
+        validate: handleValidate(rules),
+      });
 
-  return <>{children && React.cloneElement(children, setChildrenProps())}</>;
-}
+      setStatus('succeeded');
+    }
+  }, [
+    handleStoreChange,
+    handleValidate,
+    name,
+    rules,
+    shouldUpdate,
+    signInField,
+    status,
+    validateFirst,
+  ]);
+
+  const main = renderMain?.({
+    ...childrenProps,
+    ...handleChildrenProps(),
+    ref,
+  });
+
+  const content = <>{main}</>;
+  const container = renderContainer?.({
+    ...childrenProps,
+    children: content,
+  });
+
+  return <>{container}</>;
+};
+
+export default FormItem;

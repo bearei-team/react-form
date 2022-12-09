@@ -1,26 +1,26 @@
 import Schema, {RuleItem, ValidateError, ValidateFieldsError, Values} from 'async-validator';
 
 /**
- * 校验规则选项
+ *  Validate rule options
  */
 export interface ValidateOptions {
   /**
-   * 字段名称
+   * The name of the validation field
    */
   name: string;
 
   /**
-   * 校验值
+   * Validation field values
    */
   value: unknown;
 
   /**
-   * 校验规则集合
+   * Validate rules
    */
   rules?: RuleItem[];
 
   /**
-   * 当某一规则校验不通过时，是否停止剩下的规则的校验
+   * When a rule fails, do you stop checking the rest of the rules
    */
   validateFirst?: boolean;
 }
@@ -31,11 +31,12 @@ const validate = ({name, value, rules = [], validateFirst}: ValidateOptions) =>
     {first: validateFirst, suppressWarning: true},
   );
 
-export const validateRule = async ({rules, name, value, ...args}: ValidateOptions) => {
+const validateRule = async (options: ValidateOptions) => {
+  const {rules, name, value} = options;
   const handleErrors = (errors: ValidateError[] | null, fields: ValidateFieldsError | Values) =>
     fields[name] === value ? undefined : {errors: errors ?? [], rules};
 
-  return validate({rules, name, value, ...args})
+  return validate(options)
     .then(() => undefined)
     .catch(error => {
       if (!error.errors) {
@@ -47,3 +48,5 @@ export const validateRule = async ({rules, name, value, ...args}: ValidateOption
       return handleErrors(errors, fields);
     });
 };
+
+export default validateRule;
