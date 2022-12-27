@@ -1,4 +1,9 @@
-import Schema, {RuleItem, ValidateError, ValidateFieldsError, Values} from 'async-validator';
+import Schema, {
+  RuleItem,
+  ValidateError,
+  ValidateFieldsError,
+  Values,
+} from 'async-validator';
 
 /**
  *  Validate rule options
@@ -25,16 +30,23 @@ export interface ValidateOptions {
   validateFirst?: boolean;
 }
 
-const validate = ({name, value, rules = [], validateFirst}: ValidateOptions) =>
-  new Schema({[name]: rules}).validate(
-    {[name]: value},
-    {first: validateFirst, suppressWarning: true},
+const validate = ({
+  name,
+  value,
+  rules = [],
+  validateFirst,
+}: ValidateOptions) =>
+  new Schema({ [name]: rules }).validate(
+    { [name]: value },
+    { first: validateFirst, suppressWarning: true },
   );
 
 const validateRule = async (options: ValidateOptions) => {
-  const {rules, name, value} = options;
-  const handleErrors = (errors: ValidateError[] | null, fields: ValidateFieldsError | Values) =>
-    fields[name] === value ? undefined : {errors: errors ?? [], rules};
+  const { rules, name, value } = options;
+  const handleErrors = (
+    errors: ValidateError[] | null,
+    fields: ValidateFieldsError | Values,
+  ) => (fields[name] === value ? undefined : { errors: errors ?? [], rules });
 
   return validate(options)
     .then(() => undefined)
@@ -43,7 +55,7 @@ const validateRule = async (options: ValidateOptions) => {
         throw error;
       }
 
-      const {errors, fields} = error;
+      const { errors, fields } = error;
 
       return handleErrors(errors, fields);
     });

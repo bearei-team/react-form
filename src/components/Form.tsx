@@ -7,17 +7,19 @@ import {
   useId,
   useState,
 } from 'react';
-import type {ViewProps} from 'react-native';
-import {Callbacks, FormInstance, Stores} from '../hooks/formInstance';
+import type { ViewProps } from 'react-native';
+import type { Callbacks, FormInstance, Stores } from '../hooks/formInstance';
 import useForm from '../hooks/useForm';
-import {FormContext} from '../hooks/useFormContext';
-import FormItem, {BaseFormItemProps} from './FormItem';
+import { FormContext } from '../hooks/useFormContext';
+import FormItem, { BaseFormItemProps } from './FormItem';
 
 /**
  * Base form props
  */
 export interface BaseFormProps<T = HTMLFormElement, F = Stores>
-  extends Partial<DetailedHTMLProps<FormHTMLAttributes<T>, T> & ViewProps & Callbacks<F>> {
+  extends Partial<
+    DetailedHTMLProps<FormHTMLAttributes<T>, T> & ViewProps & Callbacks<F>
+  > {
   /**
    * Custom ref
    */
@@ -54,7 +56,8 @@ export interface FormProps<T, F = Stores> extends BaseFormProps<T, F> {
   renderContainer: (props: FormContainerProps<T, F>) => ReactNode;
 }
 
-export interface FormChildrenProps<T, F> extends Omit<BaseFormProps<T, F>, 'ref'> {
+export interface FormChildrenProps<T, F>
+  extends Omit<BaseFormProps<T, F>, 'ref'> {
   /**
    * Component unique ID
    */
@@ -62,10 +65,14 @@ export interface FormChildrenProps<T, F> extends Omit<BaseFormProps<T, F>, 'ref'
   children?: ReactNode;
 }
 
-export type FormMainProps<T, F> = FormChildrenProps<T, F> & Pick<BaseFormProps<T>, 'ref'>;
+export type FormMainProps<T, F> = FormChildrenProps<T, F> &
+  Pick<BaseFormProps<T>, 'ref'>;
 export type FormContainerProps<T, F> = FormChildrenProps<T, F>;
 
-export type FormType = typeof Form & {Item: typeof FormItem; useForm: typeof useForm};
+export type FormType = typeof Form & {
+  Item: typeof FormItem;
+  useForm: typeof useForm;
+};
 
 const Form = <T extends HTMLFormElement, F extends Stores>({
   ref,
@@ -81,12 +88,12 @@ const Form = <T extends HTMLFormElement, F extends Stores>({
   const id = useId();
   const [status, setStatus] = useState('idle');
   const [formInstance] = useForm(form);
-  const {setCallbacks, setInitialValues} = formInstance;
-  const childrenProps = {...args, id};
+  const { setCallbacks, setInitialValues } = formInstance;
+  const childrenProps = { ...args, id };
 
   useEffect(() => {
     if (status === 'idle') {
-      setCallbacks({onFinish, onFinishFailed, onValuesChange});
+      setCallbacks({ onFinish, onFinishFailed, onValuesChange });
       setInitialValues(initialValues, status !== 'idle');
       setStatus('succeeded');
     }
@@ -100,7 +107,7 @@ const Form = <T extends HTMLFormElement, F extends Stores>({
     status,
   ]);
 
-  const main = renderMain({...childrenProps, ref});
+  const main = renderMain({ ...childrenProps, ref });
   const container = renderContainer({
     ...childrenProps,
     children: main,
@@ -113,7 +120,7 @@ const Form = <T extends HTMLFormElement, F extends Stores>({
   );
 };
 
-Object.defineProperty(Form, 'Item', {value: FormItem});
-Object.defineProperty(Form, 'useForm', {value: useForm});
+Object.defineProperty(Form, 'Item', { value: FormItem });
+Object.defineProperty(Form, 'useForm', { value: useForm });
 
 export default Form as FormType;

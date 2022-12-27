@@ -1,4 +1,4 @@
-import {RuleItem} from 'async-validator';
+import type { RuleItem } from 'async-validator';
 import {
   DetailedHTMLProps,
   HTMLAttributes,
@@ -9,10 +9,10 @@ import {
   useId,
   useState,
 } from 'react';
-import {Stores} from '../hooks/formInstance';
+import type { ViewProps } from 'react-native';
+import type { Stores } from '../hooks/formInstance';
 import useFormContext from '../hooks/useFormContext';
-import validateRule, {ValidateOptions} from '../utils/validate';
-import type {ViewProps} from 'react-native';
+import validateRule, { ValidateOptions } from '../utils/validate';
 
 /**
  * Base form item props
@@ -90,7 +90,8 @@ export interface FormItemProps<T, F> extends BaseFormItemProps<T, F> {
   renderContainer: (props: FormItemContainerProps<T, F>) => ReactNode;
 }
 
-export interface FormItemChildrenProps<T, F> extends Omit<BaseFormItemProps<T, F>, 'ref'> {
+export interface FormItemChildrenProps<T, F>
+  extends Omit<BaseFormItemProps<T, F>, 'ref'> {
   /**
    * Component unique ID
    */
@@ -133,11 +134,15 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
   const id = useId();
   const [status, setStatus] = useState('idle');
   const [, forceUpdate] = useState({});
-  const {signInField, getFieldValue, setFieldsValue, getFieldError} = useFormContext<F>();
+  const { signInField, getFieldValue, setFieldsValue, getFieldError } =
+    useFormContext<F>();
   const errorMessage = name && getFieldError(name)?.errors[0].message;
   const childrenProps = {
     ...args,
-    required: typeof required === 'boolean' ? required : rules?.some(({required}) => required),
+    required:
+      typeof required === 'boolean'
+        ? required
+        : rules?.some(({ required }) => required),
     id,
   };
 
@@ -150,7 +155,8 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
 
   const handleChildrenProps = () => ({
     value: name && getFieldValue(name),
-    onValueChange: (value?: unknown) => name && setFieldsValue({[name]: value} as F),
+    onValueChange: (value?: unknown) =>
+      name && setFieldsValue({ [name]: value } as F),
   });
 
   const handleValidate = useCallback(
@@ -177,7 +183,7 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
     if (status === 'idle') {
       signInField({
         touched: false,
-        props: {name, rules, validateFirst, shouldUpdate},
+        props: { name, rules, validateFirst, shouldUpdate },
         onStoreChange: handleStoreChange(name),
         validate: handleValidate(rules),
       });
@@ -217,7 +223,7 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
     ref,
   });
 
-  const container = renderContainer({...childrenProps, children: main});
+  const container = renderContainer({ ...childrenProps, children: main });
 
   return <>{container}</>;
 };

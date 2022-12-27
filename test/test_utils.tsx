@@ -1,17 +1,20 @@
-import React, {FC, ReactElement} from 'react';
-import {render, RenderOptions, queries} from '@testing-library/react';
+import { queries, render, RenderOptions } from '@testing-library/react';
+import React, { FC, ReactElement } from 'react';
 import * as customQueries from './custom_queries';
 
-const AllTheProviders: FC<{children: React.ReactNode}> = ({children}) => {
+const AllTheProviders: FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper' | 'queries'>) =>
+const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper' | 'queries'>,
+) =>
   render(ui, {
     wrapper: AllTheProviders,
-    queries: {...queries, ...customQueries},
+    queries: { ...queries, ...customQueries },
     ...options,
   });
 
 export * from '@testing-library/react';
-export {customRender as render};
+export { customRender as render };

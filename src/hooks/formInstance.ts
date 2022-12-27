@@ -1,7 +1,7 @@
-import handleNamePath, {NamePath} from '../utils/namePath';
-import {ValidateError} from 'async-validator';
-import {ValidateOptions} from '..';
-import {BaseFormItemProps} from '../components/FormItem';
+import type { ValidateError } from 'async-validator';
+import type { ValidateOptions } from '..';
+import type { BaseFormItemProps } from '../components/FormItem';
+import handleNamePath, { NamePath } from '../utils/namePath';
 
 /**
  * Form fields are stored
@@ -46,7 +46,7 @@ export interface Callbacks<T> {
   /**
    * This function is called when the form is completed
    */
-  onFinish?: <E = unknown>(options: {event?: E; values: T}) => void;
+  onFinish?: <E = unknown>(options: { event?: E; values: T }) => void;
 
   /**
    * This function is called when the form fails to complete
@@ -71,12 +71,15 @@ export interface FormInstance<T = Stores> {
   /**
    * Gets the form field entities name
    */
-  getFieldEntitiesName: (names?: (keyof T)[], signOut?: boolean) => (keyof T | undefined)[];
+  getFieldEntitiesName: (
+    names?: (keyof T)[],
+    signOut?: boolean,
+  ) => (keyof T | undefined)[];
 
   /**
    * Sign in form field
    */
-  signInField: (entity: FieldEntity<T>) => {signOut: () => void};
+  signInField: (entity: FieldEntity<T>) => { signOut: () => void };
 
   /**
    * Sign out form field
@@ -86,7 +89,10 @@ export interface FormInstance<T = Stores> {
   /**
    * Set the value of the form fields
    */
-  setFieldsValue: (values?: T, options?: {validate?: boolean; response?: boolean}) => void;
+  setFieldsValue: (
+    values?: T,
+    options?: { validate?: boolean; response?: boolean },
+  ) => void;
 
   /**
    * Gets the value of the form field
@@ -156,7 +162,9 @@ export interface FormInstance<T = Stores> {
   submit: (skipValidate?: boolean) => void;
 }
 
-const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstance<T> => {
+const formInstance = <T extends Stores>(
+  forceUpdateForm: () => void,
+): FormInstance<T> => {
   const stores = {} as T;
   const initialValues = {} as T;
   const callbacks = {} as Callbacks<T>;
@@ -165,26 +173,37 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
   let fieldEntities: FieldEntity<T>[] = [];
 
   const getFieldEntities = (signOut = false) =>
-    signOut ? fieldEntities : fieldEntities.filter(fieldEntity => fieldEntity.props.name);
+    signOut
+      ? fieldEntities
+      : fieldEntities.filter(fieldEntity => fieldEntity.props.name);
 
   const getFieldEntitiesName = (names?: (keyof T)[], signOut = false) => {
-    const entityNames = getFieldEntities(signOut).map(({props}) => props.name);
+    const entityNames = getFieldEntities(signOut).map(
+      ({ props }) => props.name,
+    );
 
-    return [...(names ? entityNames.filter(name => name && names.includes(name)) : entityNames)];
+    return [
+      ...(names
+        ? entityNames.filter(name => name && names.includes(name))
+        : entityNames),
+    ];
   };
 
   const signInField = (entity: FieldEntity<T>) => {
-    const {name} = entity.props;
+    const { name } = entity.props;
 
     if (name) {
       const currentEntities = getFieldEntities(true);
-      const exist = currentEntities.find(({props}) => props.name === name);
+      const exist = currentEntities.find(({ props }) => props.name === name);
 
       if (!exist) {
         fieldEntities = [...currentEntities, entity];
 
-        setFieldsValue({[name]: undefined} as T, {validate: false, response: false});
-        setFieldError({[name]: undefined} as Errors<T>);
+        setFieldsValue({ [name]: undefined } as T, {
+          validate: false,
+          response: false,
+        });
+        setFieldError({ [name]: undefined } as Errors<T>);
       }
     }
 
@@ -198,18 +217,22 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
     const handleSignOut = (name?: keyof T) => {
       if (name) {
         const currentEntities = getFieldEntities(true);
-        const fieldEntity = currentEntities.find(({props}) => props.name === name);
+        const fieldEntity = currentEntities.find(
+          ({ props }) => props.name === name,
+        );
 
         if (fieldEntity) {
-          const nextStores = {...stores};
-          const nextErrors = {...errors};
+          const nextStores = { ...stores };
+          const nextErrors = { ...errors };
 
           delete nextStores[name];
           delete nextErrors[name];
 
-          fieldEntities = currentEntities.filter(({props}) => props.name !== name);
+          fieldEntities = currentEntities.filter(
+            ({ props }) => props.name !== name,
+          );
 
-          setFieldsValue(nextStores, {validate: false, response: false});
+          setFieldsValue(nextStores, { validate: false, response: false });
           setFieldError(nextErrors);
         }
       }
@@ -218,10 +241,16 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
     getFieldEntitiesName(names).forEach(handleSignOut);
   };
 
-  const setFieldsValue = (values = {} as T, {validate = true, response = true} = {}) => {
-    const {onValuesChange} = callbacks;
+  const setFieldsValue = (
+    values = {} as T,
+    { validate = true, response = true } = {},
+  ) => {
+    const { onValuesChange } = callbacks;
     const entities = getFieldEntities();
-    const handleStoreChange = (name: keyof T, onStoreChange: (name: keyof T) => void) => {
+    const handleStoreChange = (
+      name: keyof T,
+      onStoreChange: (name: keyof T) => void,
+    ) => {
       setFieldTouched(name, true);
       onStoreChange(name);
     };
@@ -231,7 +260,7 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
     values &&
       response &&
       Object.keys(values).forEach(key => {
-        const entity = entities.find(({props}) => props.name === key);
+        const entity = entities.find(({ props }) => props.name === key);
 
         if (entity) {
           handleStoreChange(key, entity.onStoreChange);
@@ -249,9 +278,12 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
   function getFieldValue(name?: NamePath<T>) {
     const names = handleNamePath(name);
     const values = {} as T;
-    const handleValue = (name?: keyof T) => name && Object.assign(values, {[name]: stores[name]});
+    const handleValue = (name?: keyof T) =>
+      name && Object.assign(values, { [name]: stores[name] });
 
-    names ? getFieldEntitiesName(names).forEach(handleValue) : Object.assign(values, stores);
+    names
+      ? getFieldEntitiesName(names).forEach(handleValue)
+      : Object.assign(values, stores);
 
     return !Array.isArray(name) && name ? values[name] : values;
   }
@@ -266,9 +298,12 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
   function getFieldError(name?: NamePath<T>) {
     const names = handleNamePath(name);
     const errs = {} as Errors<T>;
-    const handleError = (name?: keyof T) => name && Object.assign(errs, {[name]: errors[name]});
+    const handleError = (name?: keyof T) =>
+      name && Object.assign(errs, { [name]: errors[name] });
 
-    names ? getFieldEntitiesName(names).forEach(handleError) : Object.assign(errs, errors);
+    names
+      ? getFieldEntitiesName(names).forEach(handleError)
+      : Object.assign(errs, errors);
 
     return !Array.isArray(name) && name ? errs[name] : errs;
   }
@@ -282,7 +317,9 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
 
       Object.entries(initialValues)
         .filter(([key]) => names.includes(key))
-        .forEach(([key, value]) => Object.assign(fieldsValue, {[key]: value}));
+        .forEach(([key, value]) =>
+          Object.assign(fieldsValue, { [key]: value }),
+        );
 
       setFieldsValue(fieldsValue);
     }
@@ -297,7 +334,9 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
     name &&
       (fieldEntities = [
         ...getFieldEntities().map(fieldEntity =>
-          fieldEntity.props.name === name ? {...fieldEntity, touched} : fieldEntity,
+          fieldEntity.props.name === name
+            ? { ...fieldEntity, touched }
+            : fieldEntity,
         ),
       ]);
   };
@@ -306,7 +345,7 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
     const names = handleNamePath(name);
     const entities = getFieldEntities();
     const handleFieldTouched = (name?: keyof T) =>
-      name && entities.find(({props}) => props.name === name)?.touched;
+      name && entities.find(({ props }) => props.name === name)?.touched;
 
     return getFieldEntitiesName(names)
       .map(handleFieldTouched)
@@ -322,11 +361,11 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
     const handleValidate = (name?: keyof T) =>
       name
         ? entities
-            .find(({props}) => props.name === name)
+            .find(({ props }) => props.name === name)
             ?.validate()
             .then(result => {
               if (result) {
-                setFieldError({[name]: result} as Errors<T>);
+                setFieldError({ [name]: result } as Errors<T>);
 
                 return result;
               }
@@ -341,14 +380,16 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
       fieldErrors.forEach(fieldError => {
         const field = fieldError?.errors[0].field;
 
-        field && Object.assign(errs, {[field]: fieldError});
+        field && Object.assign(errs, { [field]: fieldError });
       });
 
       return !Array.isArray(name) && name ? errs[name] : errs;
     };
 
     const fieldErrors = await Promise.all(
-      getFieldEntitiesName(names).map(name => (name ? handleValidate(name) : undefined)),
+      getFieldEntitiesName(names).map(name =>
+        name ? handleValidate(name) : undefined,
+      ),
     );
 
     return handleFieldErrors(fieldErrors);
@@ -358,8 +399,8 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
     const names = handleNamePath(name);
     const handleReset = (name?: keyof T) => {
       if (name) {
-        setFieldsValue({[name]: undefined} as T, {validate: false});
-        setFieldError({[name]: undefined} as Errors<T>);
+        setFieldsValue({ [name]: undefined } as T, { validate: false });
+        setFieldError({ [name]: undefined } as Errors<T>);
       }
     };
 
@@ -367,18 +408,20 @@ const formInstance = <T extends Stores>(forceUpdateForm: () => void): FormInstan
   };
 
   const submit = <E = unknown>(event?: E, skipValidate = false) => {
-    const {onFinish, onFinishFailed} = callbacks;
+    const { onFinish, onFinishFailed } = callbacks;
     const handleFailed = (errs: Errors<T>) => {
       onFinishFailed?.(errs);
       forceUpdateForm();
     };
 
-    const handleFinish = () => onFinish?.({event, values: stores});
+    const handleFinish = () => onFinish?.({ event, values: stores });
 
     skipValidate
       ? handleFinish()
       : validateField().then(errs =>
-          Object.entries(errs).find(([, value]) => value) ? handleFailed(errs) : handleFinish(),
+          Object.entries(errs).find(([, value]) => value)
+            ? handleFailed(errs)
+            : handleFinish(),
         );
   };
 
