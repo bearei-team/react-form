@@ -1,5 +1,5 @@
-import React, {Context, useContext} from 'react';
-import {FormInstance, Stores} from './formInstance';
+import React, { Context, useContext } from 'react';
+import type { FormInstance, Stores } from './formInstance';
 
 export const FormContext = React.createContext({} as FormInstance);
 

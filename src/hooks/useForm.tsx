@@ -1,5 +1,5 @@
-import {useRef, useState} from 'react';
-import formInstance, {FormInstance, Stores} from './formInstance';
+import { useRef, useState } from 'react';
+import formInstance, { FormInstance, Stores } from './formInstance';
 
 const useForm = <T extends Stores>(form?: FormInstance<T>) => {
   const formRef = useRef<FormInstance<T>>();

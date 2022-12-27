@@ -1,4 +1,4 @@
-import {Stores} from '..';
+import type { Stores } from '..';
 
 export type NamePath<T = Stores> = keyof T | (keyof T)[];
 

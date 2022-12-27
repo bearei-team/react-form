@@ -1,15 +1,14 @@
 import '@testing-library/jest-dom';
-import {render} from '../test_utils';
-import {fireEvent} from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
+import React, { useEffect, useState } from 'react';
 import Form from '../../src/components/Form';
-import {useEffect, useState} from 'react';
-import React from 'react';
 import useForm from '../../src/hooks/useForm';
+import { render } from '../test_utils';
 
 const items = [
-  {label: 'label1', name: 'name1'},
-  {label: 'label2', name: 'name2'},
-  {label: 'label3', name: 'name3'},
+  { label: 'label1', name: 'name1' },
+  { label: 'label2', name: 'name2' },
+  { label: 'label3', name: 'name3' },
 ];
 interface CostInputProps {
   onValueChange?: (value: string) => void;
@@ -18,7 +17,12 @@ interface CostInputProps {
   form: any;
 }
 
-const CostInput: React.FC<CostInputProps> = ({value, onValueChange, index, form}) => {
+const CostInput: React.FC<CostInputProps> = ({
+  value,
+  onValueChange,
+  index,
+  form,
+}) => {
   const [inputValue, setInputValue] = useState('');
   const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     ev.preventDefault();
@@ -50,12 +54,12 @@ const setup = () => {
       <Form
         form={form}
         items={items}
-        renderMain={({items}) =>
+        renderMain={({ items }) =>
           items?.map((item, index) => (
             <Form.Item
               key={item.name}
               {...item}
-              renderMain={({value, onValueChange}) => (
+              renderMain={({ value, onValueChange }) => (
                 <div data-cy={`input-${index}`} tabIndex={index}>
                   <CostInput
                     value={`${value}`}
@@ -65,7 +69,7 @@ const setup = () => {
                   />
                 </div>
               )}
-              renderContainer={({children}) => (
+              renderContainer={({ children }) => (
                 <div data-cy={`form-item-${index}`} tabIndex={index}>
                   {children}
                 </div>
@@ -73,7 +77,7 @@ const setup = () => {
             />
           ))
         }
-        renderContainer={({children}) => (
+        renderContainer={({ children }) => (
           <div data-cy="form" tabIndex={1}>
             {children}
           </div>
@@ -93,23 +97,23 @@ const setup = () => {
 };
 
 describe('test/components/FormItem.test.ts', () => {
-  test('It should be a render form', () => {
-    const {getByDataCy} = render(
+  test('It should be a render form', async () => {
+    const { getByDataCy } = render(
       <Form
         items={items}
-        renderMain={({items}) =>
+        renderMain={({ items }) =>
           items?.map((item, index) => (
             <Form.Item
               key={item.name}
               {...item}
-              renderMain={({value, onValueChange}) => (
+              renderMain={({ value, onValueChange }) => (
                 <input
                   data-cy={`input-${index}`}
                   value={`${value}`}
                   onChange={e => onValueChange?.(e.target.value)}
                 />
               )}
-              renderContainer={({children}) => (
+              renderContainer={({ children }) => (
                 <div data-cy={`form-item-${index}`} tabIndex={index}>
                   {children}
                 </div>
@@ -117,7 +121,7 @@ describe('test/components/FormItem.test.ts', () => {
             />
           ))
         }
-        renderContainer={({children}) => (
+        renderContainer={({ children }) => (
           <div data-cy="form" tabIndex={1}>
             {children}
           </div>
@@ -131,11 +135,11 @@ describe('test/components/FormItem.test.ts', () => {
   });
 
   test('It would be to change the input value', async () => {
-    const {input} = setup();
+    const { input } = setup();
 
     expect(input).toHaveAttribute('value');
 
-    fireEvent.change(input, {target: {value: '17'}});
+    fireEvent.change(input, { target: { value: '17' } });
 
     fireEvent.focus(input);
     fireEvent.blur(input);
