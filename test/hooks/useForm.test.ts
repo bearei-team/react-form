@@ -3,7 +3,7 @@ import {renderHook} from '@testing-library/react';
 import useForm from '../../src/hooks/useForm';
 
 describe('test/hooks/useForm.test.ts', () => {
-  test('It should be getting an instance of the form', () => {
+  test('It should be getting an instance of the form', async () => {
     const {result} = renderHook(() => useForm());
     const [form] = result.current;
 

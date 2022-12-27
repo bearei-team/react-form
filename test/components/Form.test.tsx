@@ -1,10 +1,9 @@
 import '@testing-library/jest-dom';
-import {render} from '../test_utils';
 import {fireEvent} from '@testing-library/react';
+import React, {useEffect, useState} from 'react';
 import Form from '../../src/components/Form';
-import {useEffect, useState} from 'react';
-import React from 'react';
 import useForm from '../../src/hooks/useForm';
+import {render} from '../test_utils';
 
 const items = [
   {label: 'label1', name: 'name1'},
@@ -93,7 +92,7 @@ const setup = () => {
 };
 
 describe('test/components/FormItem.test.ts', () => {
-  test('It should be a render form', () => {
+  test('It should be a render form', async () => {
     const {getByDataCy} = render(
       <Form
         items={items}

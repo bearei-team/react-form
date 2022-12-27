@@ -1,7 +1,7 @@
-import validateRule from '../../src/utils/validate';
 import '@testing-library/jest-dom';
 import {RuleType} from 'async-validator';
 import formInstance, {FormInstance, Stores} from '../../src/hooks/formInstance';
+import validateRule from '../../src/utils/validate';
 
 const names = ['name', 'password', 'code'];
 const signInField = (from: FormInstance<Record<string, unknown>>) => {
@@ -33,7 +33,7 @@ const signInField = (from: FormInstance<Record<string, unknown>>) => {
 };
 
 describe('test/hooks/formInstance.test.ts', () => {
-  test('It should be getting an instance of the form', () => {
+  test('It should be getting an instance of the form', async () => {
     const from = formInstance(() => {});
 
     expect(Object.entries(from).every(([, fun]) => typeof fun === 'function')).toEqual(true);

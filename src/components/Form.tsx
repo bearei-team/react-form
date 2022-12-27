@@ -7,11 +7,11 @@ import {
   useId,
   useState,
 } from 'react';
+import type {ViewProps} from 'react-native';
 import {Callbacks, FormInstance, Stores} from '../hooks/formInstance';
 import useForm from '../hooks/useForm';
 import {FormContext} from '../hooks/useFormContext';
 import FormItem, {BaseFormItemProps} from './FormItem';
-import type {ViewProps} from 'react-native';
 
 /**
  * Base form props
@@ -65,7 +65,7 @@ export interface FormChildrenProps<T, F> extends Omit<BaseFormProps<T, F>, 'ref'
 export type FormMainProps<T, F> = FormChildrenProps<T, F> & Pick<BaseFormProps<T>, 'ref'>;
 export type FormContainerProps<T, F> = FormChildrenProps<T, F>;
 
-export type FormType = typeof Form & {Item: typeof FormItem};
+export type FormType = typeof Form & {Item: typeof FormItem; useForm: typeof useForm};
 
 const Form = <T extends HTMLFormElement, F extends Stores>({
   ref,
@@ -114,5 +114,6 @@ const Form = <T extends HTMLFormElement, F extends Stores>({
 };
 
 Object.defineProperty(Form, 'Item', {value: FormItem});
+Object.defineProperty(Form, 'useForm', {value: useForm});
 
 export default Form as FormType;
