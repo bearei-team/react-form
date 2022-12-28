@@ -62,7 +62,6 @@ export interface FormChildrenProps<T, F>
    * Component unique ID
    */
   id: string;
-  children?: ReactNode;
 }
 
 export type FormMainProps<T, F> = FormChildrenProps<T, F> &

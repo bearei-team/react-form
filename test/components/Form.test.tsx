@@ -1,28 +1,36 @@
 import '@testing-library/jest-dom';
 import { fireEvent } from '@testing-library/react';
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import Form from '../../src/components/Form';
+import type { ControlProps } from '../../src/components/FormItem';
 import useForm from '../../src/hooks/useForm';
 import { render } from '../test_utils';
 
 const items = [
-  { label: 'label1', name: 'name1' },
-  { label: 'label2', name: 'name2' },
-  { label: 'label3', name: 'name3' },
+  {
+    label: 'label1',
+    name: 'name1',
+    control: (props: ControlProps) => <CostInput {...props} index={1} />,
+  },
+  {
+    label: 'label2',
+    name: 'name2',
+    control: (props: ControlProps) => <CostInput {...props} index={2} />,
+  },
+  {
+    label: 'label3',
+    name: 'name3',
+    control: (props: ControlProps) => <CostInput {...props} index={3} />,
+  },
 ];
+
 interface CostInputProps {
   onValueChange?: (value: string) => void;
-  value?: string;
-  index?: string;
-  form: any;
+  value?: unknown;
+  index?: number;
 }
 
-const CostInput: React.FC<CostInputProps> = ({
-  value,
-  onValueChange,
-  index,
-  form,
-}) => {
+const CostInput: FC<CostInputProps> = ({ value, onValueChange, index }) => {
   const [inputValue, setInputValue] = useState('');
   const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     ev.preventDefault();
@@ -33,13 +41,13 @@ const CostInput: React.FC<CostInputProps> = ({
   };
 
   useEffect(() => {
-    value && value !== inputValue && setInputValue(value);
+    value && value !== inputValue && setInputValue(`${value}`);
   }, [value]);
 
   return (
     <input
       value={inputValue}
-      data-cy="input"
+      data-cy={`input-${index}`}
       aria-label={`cost-input-${index}`}
       onChange={handleChange}
     />
@@ -59,16 +67,9 @@ const setup = () => {
             <Form.Item
               key={item.name}
               {...item}
-              renderMain={({ value, onValueChange }) => (
-                <div data-cy={`input-${index}`} tabIndex={index}>
-                  <CostInput
-                    value={`${value}`}
-                    onValueChange={onValueChange}
-                    index={`${index}`}
-                    form={form}
-                  />
-                </div>
-              )}
+              renderMain={({ value, onValueChange, control }) =>
+                control?.({ value, onValueChange })
+              }
               renderContainer={({ children }) => (
                 <div data-cy={`form-item-${index}`} tabIndex={index}>
                   {children}
@@ -87,13 +88,9 @@ const setup = () => {
   };
 
   const utils = render(<CostInputForm />);
-
   const input = utils.getByLabelText('cost-input-1') as HTMLInputElement;
 
-  return {
-    input,
-    ...utils,
-  };
+  return { input, ...utils };
 };
 
 describe('test/components/FormItem.test.ts', () => {
@@ -106,13 +103,9 @@ describe('test/components/FormItem.test.ts', () => {
             <Form.Item
               key={item.name}
               {...item}
-              renderMain={({ value, onValueChange }) => (
-                <input
-                  data-cy={`input-${index}`}
-                  value={`${value}`}
-                  onChange={e => onValueChange?.(e.target.value)}
-                />
-              )}
+              renderMain={({ value, onValueChange, control }) =>
+                control?.({ value, onValueChange })
+              }
               renderContainer={({ children }) => (
                 <div data-cy={`form-item-${index}`} tabIndex={index}>
                   {children}
