@@ -1,5 +1,4 @@
 export * from './components/Form';
-export { default as Form } from './components/Form';
 export * from './components/FormItem';
 export { default as FormItem } from './components/FormItem';
 export * from './hooks/formInstance';
@@ -12,3 +11,6 @@ export * from './utils/namePath';
 export { default as namePath } from './utils/namePath';
 export * from './utils/validate';
 export { default as validate } from './utils/validate';
+import Form from './components/Form';
+
+export default Form;
