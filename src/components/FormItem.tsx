@@ -14,6 +14,11 @@ import type { Stores } from '../hooks/formInstance';
 import useFormContext from '../hooks/useFormContext';
 import validateRule, { ValidateOptions } from '../utils/validate';
 
+export interface ControlProps {
+  value: unknown;
+  onValueChange?: (value?: unknown) => void;
+}
+
 /**
  * Base form item props
  */
@@ -63,6 +68,8 @@ export interface BaseFormItemProps<T = HTMLElement, F = Stores>
    * Whether the form item should be updated
    */
   shouldUpdate?: boolean;
+
+  control?: (props: ControlProps) => ReactNode;
 }
 
 /**
@@ -96,7 +103,6 @@ export interface FormItemChildrenProps<T, F>
    * Component unique ID
    */
   id: string;
-  children?: ReactNode;
 
   /**
    * Form item value

@@ -1,7 +1,7 @@
-import React, { Context, useContext } from 'react';
+import { Context, createContext, useContext } from 'react';
 import type { FormInstance, Stores } from './formInstance';
 
-export const FormContext = React.createContext({} as FormInstance);
+export const FormContext = createContext({} as FormInstance);
 
 const useFormContext = <T extends Stores>() =>
   useContext<FormInstance<T>>(FormContext as Context<FormInstance<T>>);
