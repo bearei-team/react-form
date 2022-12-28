@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { RuleType } from 'async-validator';
+import type { RuleType } from 'async-validator';
 import formInstance, {
   FormInstance,
   Stores,

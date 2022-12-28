@@ -66,30 +66,35 @@ Base form components that support React and React native
 ```typescript
 import React from 'React';
 import ReactDOM from 'react-dom';
-import form, {FormItem} from '@bearei/react-form';
+import form, { FormItem } from '@bearei/react-form';
 
 const items = [
-  {label: 'label1', name: 'name1'},
-  {label: 'label2', name: 'name2'},
-  {label: 'label3', name: 'name3'},
+  { label: 'label1', name: 'name1' },
+  { label: 'label2', name: 'name2' },
+  { label: 'label3', name: 'name3' },
 ];
 
 const form = (
   <Form
     items={items}
-    renderMain={({items}) =>
+    renderMain={({ items }) =>
       items?.map((item, index) => (
         <Form.Item
           key={item.name}
           {...item}
-          renderMain={({value, onValueChange}) => (
-            <input value={`${value}`} onChange={e => onValueChange?.(e.target.value)} />
+          renderMain={({ value, onValueChange }) => (
+            <input
+              value={`${value}`}
+              onChange={e => onValueChange?.(e.target.value)}
+            />
           )}
-          renderContainer={({children}) => <div tabIndex={index}>{children}</div>}
+          renderContainer={({ children }) => (
+            <div tabIndex={index}>{children}</div>
+          )}
         />
       ))
     }
-    renderContainer={({children}) => <div tabIndex={1}>{children}</div>}
+    renderContainer={({ children }) => <div tabIndex={1}>{children}</div>}
   />
 );
 

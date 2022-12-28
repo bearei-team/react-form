@@ -67,6 +67,7 @@ export interface FormChildrenProps<T, F>
 
 export type FormMainProps<T, F> = FormChildrenProps<T, F> &
   Pick<BaseFormProps<T>, 'ref'>;
+
 export type FormContainerProps<T, F> = FormChildrenProps<T, F>;
 
 export type FormType = typeof Form & {
