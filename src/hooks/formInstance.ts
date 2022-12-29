@@ -62,7 +62,7 @@ export interface Callbacks<T> {
 /**
  * From instance
  */
-export interface FormInstance<T = Stores> {
+export interface FormInstance<T> {
   /**
    * Gets the form field entities
    */
@@ -162,7 +162,7 @@ export interface FormInstance<T = Stores> {
   submit: (skipValidate?: boolean) => void;
 }
 
-const formInstance = <T extends Stores>(
+const formInstance = <T extends Stores = Stores>(
   forceUpdateForm: () => void,
 ): FormInstance<T> => {
   const stores = {} as T;
