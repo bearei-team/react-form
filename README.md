@@ -31,6 +31,7 @@ Base form components that support React and React native
 | initialValue | `unknown` | ✘ | The initial value of the form item |
 | extra | `ReactNode` | ✘ | Additional content for the form item |
 | required | `boolean` | ✘ | Whether the form entry is a required field |
+| renderControl | `(props: ControlProps) => JSX.Element` | ✘ | Render the controlled component |
 | rules | `RuleItem[]` | ✘ | Validate rules -- [RuleItem](https://github.com/yiminghe/async-validator) |
 | validateFirst | `boolean` | ✘ | When a rule fails, do you stop checking the rest of the rules |
 | renderLabel | `(props: FormItemLabelProps) => ReactNode` | ✘ | Render the form item label |
@@ -68,10 +69,44 @@ import React from 'React';
 import ReactDOM from 'react-dom';
 import form, { FormItem } from '@bearei/react-form';
 
+interface CostInputProps {
+  onValueChange?: (value: string) => void;
+  value?: unknown;
+}
+
+const CostInput: FC<CostInputProps> = ({ value, onValueChange }) => {
+  const [inputValue, setInputValue] = useState('');
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const inputtedValue = e.currentTarget.value;
+
+    setInputValue(inputtedValue);
+    onValueChange?.(inputtedValue);
+  };
+
+  useEffect(() => {
+    value && value !== inputValue && setInputValue(`${value}`);
+  }, [value]);
+
+  return <input value={inputValue} onChange={handleChange} />;
+};
+
 const items = [
-  { label: 'label1', name: 'name1' },
-  { label: 'label2', name: 'name2' },
-  { label: 'label3', name: 'name3' },
+  {
+    label: 'label1',
+    name: 'name1',
+    renderControl: (props: ControlProps) => <CostInput {...props} />,
+  },
+  {
+    label: 'label2',
+    name: 'name2',
+    renderControl: (props: ControlProps) => <CostInput {...props} />,
+  },
+  {
+    label: 'label3',
+    name: 'name3',
+    renderControl: (props: ControlProps) => <CostInput {...props} />,
+  },
 ];
 
 const form = (
@@ -82,19 +117,14 @@ const form = (
         <Form.Item
           key={item.name}
           {...item}
-          renderMain={({ value, onValueChange }) => (
-            <input
-              value={`${value}`}
-              onChange={e => onValueChange?.(e.target.value)}
-            />
-          )}
-          renderContainer={({ children }) => (
-            <div tabIndex={index}>{children}</div>
-          )}
+          renderMain={({ value, onValueChange, renderControl }) =>
+            renderControl?.({ value, onValueChange })
+          }
+          renderContainer={({ children }) => <div>{children}</div>}
         />
       ))
     }
-    renderContainer={({ children }) => <div tabIndex={1}>{children}</div>}
+    renderContainer={({ children }) => <div>{children}</div>}
   />
 );
 

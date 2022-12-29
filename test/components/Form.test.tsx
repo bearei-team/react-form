@@ -10,17 +10,17 @@ const items = [
   {
     label: 'label1',
     name: 'name1',
-    control: (props: ControlProps) => <CostInput {...props} index={1} />,
+    renderControl: (props: ControlProps) => <CostInput {...props} index={1} />,
   },
   {
     label: 'label2',
     name: 'name2',
-    control: (props: ControlProps) => <CostInput {...props} index={2} />,
+    renderControl: (props: ControlProps) => <CostInput {...props} index={2} />,
   },
   {
     label: 'label3',
     name: 'name3',
-    control: (props: ControlProps) => <CostInput {...props} index={3} />,
+    renderControl: (props: ControlProps) => <CostInput {...props} index={3} />,
   },
 ];
 
@@ -67,8 +67,8 @@ const setup = () => {
             <Form.Item
               key={item.name}
               {...item}
-              renderMain={({ value, onValueChange, control }) =>
-                control?.({ value, onValueChange })
+              renderMain={({ value, onValueChange, renderControl }) =>
+                renderControl?.({ value, onValueChange })
               }
               renderContainer={({ children }) => (
                 <div data-cy={`form-item-${index}`} tabIndex={index}>
@@ -103,8 +103,8 @@ describe('test/components/FormItem.test.ts', () => {
             <Form.Item
               key={item.name}
               {...item}
-              renderMain={({ value, onValueChange, control }) =>
-                control?.({ value, onValueChange })
+              renderMain={({ value, onValueChange, renderControl }) =>
+                renderControl?.({ value, onValueChange })
               }
               renderContainer={({ children }) => (
                 <div data-cy={`form-item-${index}`} tabIndex={index}>

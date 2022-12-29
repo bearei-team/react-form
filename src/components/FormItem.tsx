@@ -14,15 +14,25 @@ import type { Stores } from '../hooks/formInstance';
 import useFormContext from '../hooks/useFormContext';
 import validateRule, { ValidateOptions } from '../utils/validate';
 
+/**
+ * Controlled component props
+ */
 export interface ControlProps {
+  /**
+   * Component value
+   */
   value: unknown;
+
+  /**
+   * This function is called when the value of the controlled component changes
+   */
   onValueChange?: (value?: unknown) => void;
 }
 
 /**
  * Base form item props
  */
-export interface BaseFormItemProps<T = HTMLElement, F = Stores>
+export interface BaseFormItemProps<T, S>
   extends Partial<
     DetailedHTMLProps<HTMLAttributes<T>, T> &
       ViewProps &
@@ -36,7 +46,7 @@ export interface BaseFormItemProps<T = HTMLElement, F = Stores>
   /**
    * Form item field name
    */
-  name?: keyof F;
+  name?: keyof S;
 
   /**
    * Form item label
@@ -64,41 +74,38 @@ export interface BaseFormItemProps<T = HTMLElement, F = Stores>
   required?: boolean;
 
   /**
-   * TODO:
-   * Whether the form item should be updated
+   * Render the controlled component
    */
-  shouldUpdate?: boolean;
-
-  control?: (props: ControlProps) => ReactNode;
+  renderControl?: (props: ControlProps) => JSX.Element;
 }
 
 /**
  * Form item props
  */
-export interface FormItemProps<T, F> extends BaseFormItemProps<T, F> {
+export interface FormItemProps<T, S> extends BaseFormItemProps<T, S> {
   /**
    * Render the form item label
    */
-  renderLabel?: (props: FormItemLabelProps<T, F>) => ReactNode;
+  renderLabel?: (props: FormItemLabelProps<T, S>) => ReactNode;
 
   /**
    * Render the form item extra
    */
-  renderExtra?: (props: FormItemExtraProps<T, F>) => ReactNode;
+  renderExtra?: (props: FormItemExtraProps<T, S>) => ReactNode;
 
   /**
    * Render the form item main
    */
-  renderMain: (props: FormItemMainProps<T, F>) => ReactNode;
+  renderMain: (props: FormItemMainProps<T, S>) => ReactNode;
 
   /**
    * Render the form item container
    */
-  renderContainer: (props: FormItemContainerProps<T, F>) => ReactNode;
+  renderContainer: (props: FormItemContainerProps<T, S>) => ReactNode;
 }
 
-export interface FormItemChildrenProps<T, F>
-  extends Omit<BaseFormItemProps<T, F>, 'ref'> {
+export interface FormItemChildrenProps<T, S>
+  extends Omit<BaseFormItemProps<T, S>, 'ref'> {
   /**
    * Component unique ID
    */
@@ -115,19 +122,21 @@ export interface FormItemChildrenProps<T, F>
   onValueChange?: (value?: unknown) => void;
 }
 
-export type FormItemLabelProps<T, F> = FormItemChildrenProps<T, F>;
-export type FormItemExtraProps<T, F> = FormItemChildrenProps<T, F>;
-export type FormItemMainProps<T, F> = FormItemChildrenProps<T, F> &
-  Pick<BaseFormItemProps<T>, 'ref'>;
+export type FormItemLabelProps<T, S> = FormItemChildrenProps<T, S>;
+export type FormItemExtraProps<T, S> = FormItemChildrenProps<T, S>;
+export type FormItemMainProps<T, S> = FormItemChildrenProps<T, S> &
+  Pick<BaseFormItemProps<T, S>, 'ref'>;
 
-export type FormItemContainerProps<T, F> = FormItemChildrenProps<T, F>;
+export type FormItemContainerProps<T, S> = FormItemChildrenProps<T, S>;
 
-const FormItem = <T extends HTMLElement, F extends Stores>({
+const FormItem = <
+  T extends HTMLElement = HTMLElement,
+  S extends Stores = Stores,
+>({
   ref,
   name,
   rules,
   validateFirst,
-  shouldUpdate,
   label,
   extra,
   required,
@@ -136,12 +145,13 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
   renderMain,
   renderContainer,
   ...args
-}: FormItemProps<T, F>) => {
+}: FormItemProps<T, S>) => {
   const id = useId();
   const [status, setStatus] = useState('idle');
   const [, forceUpdate] = useState({});
   const { signInField, getFieldValue, setFieldsValue, getFieldError } =
-    useFormContext<F>();
+    useFormContext<S>();
+
   const errorMessage = name && getFieldError(name)?.errors[0].message;
   const childrenProps = {
     ...args,
@@ -153,7 +163,7 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
   };
 
   const handleStoreChange = useCallback(
-    (name?: keyof F) => (changeName?: keyof F) => {
+    (name?: keyof S) => (changeName?: keyof S) => {
       name === changeName && forceUpdate({});
     },
     [],
@@ -162,7 +172,7 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
   const handleChildrenProps = () => ({
     value: name && getFieldValue(name),
     onValueChange: (value?: unknown) =>
-      name && setFieldsValue({ [name]: value } as F),
+      name && setFieldsValue({ [name]: value } as S),
   });
 
   const handleValidate = useCallback(
@@ -189,7 +199,7 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
     if (status === 'idle') {
       signInField({
         touched: false,
-        props: { name, rules, validateFirst, shouldUpdate },
+        props: { name, rules, validateFirst },
         onStoreChange: handleStoreChange(name),
         validate: handleValidate(rules),
       });
@@ -201,7 +211,6 @@ const FormItem = <T extends HTMLElement, F extends Stores>({
     handleValidate,
     name,
     rules,
-    shouldUpdate,
     signInField,
     status,
     validateFirst,

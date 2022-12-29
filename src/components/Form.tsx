@@ -16,9 +16,9 @@ import FormItem, { BaseFormItemProps } from './FormItem';
 /**
  * Base form props
  */
-export interface BaseFormProps<T = HTMLFormElement, F = Stores>
+export interface BaseFormProps<T, S>
   extends Partial<
-    DetailedHTMLProps<FormHTMLAttributes<T>, T> & ViewProps & Callbacks<F>
+    DetailedHTMLProps<FormHTMLAttributes<T>, T> & ViewProps & Callbacks<S>
   > {
   /**
    * Custom ref
@@ -28,53 +28,55 @@ export interface BaseFormProps<T = HTMLFormElement, F = Stores>
   /**
    * Form instance
    */
-  form?: FormInstance<F>;
+  form?: FormInstance<S>;
 
   /**
    * Initializes the form value
    */
-  initialValues?: F;
+  initialValues?: S;
 
   /**
    *  Form items
    */
-  items?: BaseFormItemProps<T, F>[];
+  items?: BaseFormItemProps<T, S>[];
 }
 
 /**
  * Form props
  */
-export interface FormProps<T, F = Stores> extends BaseFormProps<T, F> {
+export interface FormProps<T, S> extends BaseFormProps<T, S> {
   /**
    * Render the form main
    */
-  renderMain: (props: FormMainProps<T, F>) => ReactNode;
+  renderMain: (props: FormMainProps<T, S>) => ReactNode;
 
   /**
    * Render the form container
    */
-  renderContainer: (props: FormContainerProps<T, F>) => ReactNode;
+  renderContainer: (props: FormContainerProps<T, S>) => ReactNode;
 }
 
-export interface FormChildrenProps<T, F>
-  extends Omit<BaseFormProps<T, F>, 'ref'> {
+export interface FormChildrenProps<T, S>
+  extends Omit<BaseFormProps<T, S>, 'ref'> {
   /**
    * Component unique ID
    */
   id: string;
 }
 
-export type FormMainProps<T, F> = FormChildrenProps<T, F> &
-  Pick<BaseFormProps<T>, 'ref'>;
+export type FormMainProps<T, S> = FormChildrenProps<T, S> &
+  Pick<BaseFormProps<T, S>, 'ref'>;
 
-export type FormContainerProps<T, F> = FormChildrenProps<T, F>;
-
+export type FormContainerProps<T, S> = FormChildrenProps<T, S>;
 export type FormType = typeof Form & {
   Item: typeof FormItem;
   useForm: typeof useForm;
 };
 
-const Form = <T extends HTMLFormElement, F extends Stores>({
+const Form = <
+  T extends HTMLFormElement = HTMLFormElement,
+  S extends Stores = Stores,
+>({
   ref,
   form,
   initialValues,
@@ -84,7 +86,7 @@ const Form = <T extends HTMLFormElement, F extends Stores>({
   renderMain,
   renderContainer,
   ...args
-}: FormProps<T, F>) => {
+}: FormProps<T, S>) => {
   const id = useId();
   const [status, setStatus] = useState('idle');
   const [formInstance] = useForm(form);

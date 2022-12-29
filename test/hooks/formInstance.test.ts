@@ -24,7 +24,6 @@ const signInField = (from: FormInstance<Record<string, unknown>>) => {
       props: {
         name: item,
         validateFirst: true,
-        shouldUpdate: false,
         rules: [
           { required: true, message: 'Please enter the field values' },
           { type: 'number', message: 'Please enter the number' },
