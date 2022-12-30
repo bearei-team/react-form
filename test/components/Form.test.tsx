@@ -2,8 +2,8 @@ import '@testing-library/jest-dom';
 import { fireEvent } from '@testing-library/react';
 import React, { FC, useEffect, useState } from 'react';
 import Form from '../../src/components/Form';
-import type { ControlProps } from '../../src/components/FormItem';
-import useForm from '../../src/hooks/useForm';
+import type { ControlProps } from '../../src/components/Form_item';
+import useForm from '../../src/hooks/use_form';
 import { render } from '../test_utils';
 
 const items = [
