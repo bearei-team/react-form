@@ -1,7 +1,7 @@
 import type { ValidateError } from 'async-validator';
 import type { ValidateOptions } from '..';
-import type { BaseFormItemProps } from '../components/FormItem';
-import handleNamePath, { NamePath } from '../utils/namePath';
+import type { BaseFormItemProps } from '../components/Form_item';
+import handleNamePath, { NamePath } from '../utils/name_path';
 
 /**
  * Form fields are stored

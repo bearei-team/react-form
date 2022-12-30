@@ -8,10 +8,10 @@ import {
   useState,
 } from 'react';
 import type { ViewProps } from 'react-native';
-import type { Callbacks, FormInstance, Stores } from '../hooks/formInstance';
-import useForm from '../hooks/useForm';
-import { FormContext } from '../hooks/useFormContext';
-import FormItem, { BaseFormItemProps } from './FormItem';
+import type { Callbacks, FormInstance, Stores } from '../hooks/form_instance';
+import useForm from '../hooks/use_form';
+import { FormContext } from '../hooks/use_form_context';
+import FormItem, { BaseFormItemProps } from './Form_item';
 
 /**
  * Base form props
