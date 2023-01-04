@@ -3,7 +3,7 @@ import type { RuleType } from 'async-validator';
 import formInstance, {
   FormInstance,
   Stores,
-} from '../../src/hooks/form_instance';
+} from '../../src/hooks/form-instance';
 import validateRule from '../../src/utils/validate';
 
 const names = ['name', 'password', 'code'];
