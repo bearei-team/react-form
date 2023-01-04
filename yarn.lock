@@ -1522,8 +1522,6 @@ __metadata:
     "@babel/core": ^7.20.2
     "@babel/preset-env": ^7.20.2
     "@babel/preset-react": ^7.18.6
-    "@bearei/react-input": ^0.0.19
-    "@bearei/react-menu": ^0.0.19
     "@bearei/react-util": ^0.0.28
     "@testing-library/dom": ^8.19.0
     "@testing-library/jest-dom": ^5.16.5
@@ -1567,35 +1565,6 @@ __metadata:
     webpack-dev-server: ^4.11.1
   languageName: unknown
   linkType: soft
-
-"@bearei/react-input@npm:^0.0.19":
-  version: 0.0.19
-  resolution: "@bearei/react-input@npm:0.0.19"
-  dependencies:
-    "@bearei/react-util": ^0.0.22
-    react: ^18.2.0
-  checksum: 2f841a8af1950651719d21c4adc221daca2abe33a1bb1ed0428c791b581db081d72db3facb1d25b7b845b68199276d50c82cf76caf94750819b4d1a41e7e2033
-  languageName: node
-  linkType: hard
-
-"@bearei/react-menu@npm:^0.0.19":
-  version: 0.0.19
-  resolution: "@bearei/react-menu@npm:0.0.19"
-  dependencies:
-    "@bearei/react-util": ^0.0.22
-    react: ^18.2.0
-  checksum: b25e86b669a5269c1de3dec7238b850e417d959f9a93f3c2ca93c78db38d7800ccdd1bd729b794cdf0efa69f4a12559ff1cd20427762faaf6665b0079ca7be16
-  languageName: node
-  linkType: hard
-
-"@bearei/react-util@npm:^0.0.22":
-  version: 0.0.22
-  resolution: "@bearei/react-util@npm:0.0.22"
-  dependencies:
-    react: ^18.2.0
-  checksum: a234831c978a87c307d2a4e6244e18c1e47b5a9fdc82ce96c560f7db6bf8af94a59c496a35d027ec9b9a9ea0a3665d57f14d1b6c0e421332c6030292df29dda3
-  languageName: node
-  linkType: hard
 
 "@bearei/react-util@npm:^0.0.28":
   version: 0.0.28
