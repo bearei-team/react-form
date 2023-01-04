@@ -10,8 +10,8 @@ import {
   useState,
 } from 'react';
 import type { ViewProps } from 'react-native';
-import type { Stores } from '../hooks/form_instance';
-import useFormContext from '../hooks/use_form_context';
+import type { Stores } from '../hooks/form-instance';
+import useFormContext from '../hooks/use-form-context';
 import validateRule, { ValidateOptions } from '../utils/validate';
 
 /**
