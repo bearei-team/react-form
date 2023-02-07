@@ -27,6 +27,16 @@ export interface ControlProps {
    * This function is called when the value of the controlled component changes
    */
   onValueChange?: (value?: unknown) => void;
+
+  /**
+   * Component prefix
+   */
+  prefix?: ReactNode;
+
+  /**
+   * Component suffix
+   */
+  suffix?: ReactNode;
 }
 
 /**
