@@ -253,26 +253,23 @@ const formInstance = <T extends Stores = Stores>(
 
     values &&
       response &&
-      Object.keys(values).forEach(key => {
-        const entity = entities.find(({ props }) => props.name === key);
+      Promise.all(
+        Object.keys(values).map(async key => {
+          const entity = entities.find(({ props }) => props.name === key);
 
-        if (entity) {
-          const handleStoreChange = () => {
-            setFieldTouched(key, true);
-            entity.onStoreChange(key);
-          };
+          if (entity) {
+            const handleStoreChange = (err?: FieldError) => {
+              setFieldTouched(key, true);
+              setFieldError({ [key]: err } as Errors<T>);
+              entity.onStoreChange(key);
+            };
 
-          validate
-            ? entity.validate().then(result => {
-                result && setFieldError({ [key]: result } as Errors<T>);
-
-                handleStoreChange();
-              })
-            : handleStoreChange();
-        }
-      });
-
-    onValuesChange?.(values, stores);
+            validate
+              ? await entity.validate().then(handleStoreChange)
+              : handleStoreChange();
+          }
+        }),
+      ).then(() => onValuesChange?.(values, stores));
   };
 
   function getFieldValue(): T;
@@ -291,10 +288,7 @@ const formInstance = <T extends Stores = Stores>(
     return !Array.isArray(name) && name ? values[name] : values;
   }
 
-  const setFieldError = (error: Errors<T>) => {
-    error && Object.assign(errors, error);
-  };
-
+  const setFieldError = (error: Errors<T>) => Object.assign(errors, error);
   function getFieldError(): Errors<T>;
   function getFieldError(name?: keyof T): Errors<T>[keyof T];
   function getFieldError(name?: (keyof T)[]): Errors<T>;
@@ -367,13 +361,9 @@ const formInstance = <T extends Stores = Stores>(
             .find(({ props }) => props.name === name)
             ?.validate()
             .then(result => {
-              if (result) {
-                setFieldError({ [name]: result } as Errors<T>);
+              setFieldError({ [name]: result } as Errors<T>);
 
-                return result;
-              }
-
-              return undefined;
+              return result;
             })
         : undefined;
 
