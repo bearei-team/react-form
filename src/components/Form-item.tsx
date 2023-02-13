@@ -29,6 +29,11 @@ export interface ControlProps {
   onValueChange?: (value?: unknown) => void;
 
   /**
+   * This function is called when a controlled component changes
+   */
+  onChange?: () => void;
+
+  /**
    * Component prefix
    */
   prefix?: ReactNode;
@@ -173,14 +178,18 @@ const FormItem = <
   };
 
   const handleStoreChange = useCallback(
-    (name?: keyof S) => (changeName?: keyof S) => {
-      name === changeName && forceUpdate({});
-    },
+    (name?: keyof S) => (changeName?: keyof S) =>
+      name === changeName && forceUpdate({}),
     [],
   );
 
   const handleChildrenProps = () => ({
     value: name && getFieldValue(name),
+
+    /**
+     * Used to bind controlled component change events
+     */
+    onChange: () => undefined,
     onValueChange: (value?: unknown) =>
       name && setFieldsValue({ [name]: value } as S),
   });
@@ -205,6 +214,28 @@ const FormItem = <
     [getFieldValue, name, validateFirst],
   );
 
+  const labelNode =
+    label &&
+    renderLabel?.({
+      ...childrenProps,
+      children: label,
+    });
+
+  const extraNode = renderExtra?.({
+    ...childrenProps,
+    children: errorMessage ?? extra,
+  });
+
+  const main = renderMain({
+    ...childrenProps,
+    ...handleChildrenProps(),
+    label: labelNode,
+    extra: extraNode,
+    ref,
+  });
+
+  const container = renderContainer({ ...childrenProps, children: main });
+
   useEffect(() => {
     if (status === 'idle') {
       signInField({
@@ -225,30 +256,6 @@ const FormItem = <
     status,
     validateFirst,
   ]);
-
-  const labelNode =
-    label &&
-    renderLabel?.({
-      ...childrenProps,
-      children: label,
-    });
-
-  const extraNode =
-    extra &&
-    renderExtra?.({
-      ...childrenProps,
-      children: errorMessage ?? extra,
-    });
-
-  const main = renderMain({
-    ...childrenProps,
-    ...handleChildrenProps(),
-    label: labelNode,
-    extra: extraNode,
-    ref,
-  });
-
-  const container = renderContainer({ ...childrenProps, children: main });
 
   return <>{container}</>;
 };

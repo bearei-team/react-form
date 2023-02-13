@@ -248,13 +248,6 @@ const formInstance = <T extends Stores = Stores>(
   ) => {
     const { onValuesChange } = callbacks;
     const entities = getFieldEntities();
-    const handleStoreChange = (
-      name: keyof T,
-      onStoreChange: (name: keyof T) => void,
-    ) => {
-      setFieldTouched(name, true);
-      onStoreChange(name);
-    };
 
     Object.assign(stores, values);
 
@@ -264,9 +257,18 @@ const formInstance = <T extends Stores = Stores>(
         const entity = entities.find(({ props }) => props.name === key);
 
         if (entity) {
-          handleStoreChange(key, entity.onStoreChange);
+          const handleStoreChange = () => {
+            setFieldTouched(key, true);
+            entity.onStoreChange(key);
+          };
 
-          validate && entity.validate();
+          validate
+            ? entity.validate().then(result => {
+                result && setFieldError({ [key]: result } as Errors<T>);
+
+                handleStoreChange();
+              })
+            : handleStoreChange();
         }
       });
 

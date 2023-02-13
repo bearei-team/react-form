@@ -92,6 +92,11 @@ const Form = <
   const [formInstance] = useForm(form);
   const { setCallbacks, setInitialValues } = formInstance;
   const childrenProps = { ...args, id };
+  const main = renderMain({ ...childrenProps, ref });
+  const container = renderContainer({
+    ...childrenProps,
+    children: main,
+  });
 
   useEffect(() => {
     if (status === 'idle') {
@@ -108,12 +113,6 @@ const Form = <
     setInitialValues,
     status,
   ]);
-
-  const main = renderMain({ ...childrenProps, ref });
-  const container = renderContainer({
-    ...childrenProps,
-    children: main,
-  });
 
   return (
     <FormContext.Provider value={formInstance as FormInstance<Stores>}>
