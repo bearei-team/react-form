@@ -29,6 +29,11 @@ export interface ControlProps {
   onValueChange?: (value?: unknown) => void;
 
   /**
+   * This function is called when a controlled component changes
+   */
+  onChange?: () => void;
+
+  /**
    * Component prefix
    */
   prefix?: ReactNode;
@@ -173,14 +178,18 @@ const FormItem = <
   };
 
   const handleStoreChange = useCallback(
-    (name?: keyof S) => (changeName?: keyof S) => {
-      name === changeName && forceUpdate({});
-    },
+    (name?: keyof S) => (changeName?: keyof S) =>
+      name === changeName && forceUpdate({}),
     [],
   );
 
   const handleChildrenProps = () => ({
     value: name && getFieldValue(name),
+
+    /**
+     * Used to bind controlled component change events
+     */
+    onChange: () => undefined,
     onValueChange: (value?: unknown) =>
       name && setFieldsValue({ [name]: value } as S),
   });
@@ -205,27 +214,6 @@ const FormItem = <
     [getFieldValue, name, validateFirst],
   );
 
-  useEffect(() => {
-    if (status === 'idle') {
-      signInField({
-        touched: false,
-        props: { name, rules, validateFirst },
-        onStoreChange: handleStoreChange(name),
-        validate: handleValidate(rules),
-      });
-
-      setStatus('succeeded');
-    }
-  }, [
-    handleStoreChange,
-    handleValidate,
-    name,
-    rules,
-    signInField,
-    status,
-    validateFirst,
-  ]);
-
   const labelNode =
     label &&
     renderLabel?.({
@@ -233,12 +221,10 @@ const FormItem = <
       children: label,
     });
 
-  const extraNode =
-    extra &&
-    renderExtra?.({
-      ...childrenProps,
-      children: errorMessage ?? extra,
-    });
+  const extraNode = renderExtra?.({
+    ...childrenProps,
+    children: errorMessage ?? extra,
+  });
 
   const main = renderMain({
     ...childrenProps,
@@ -249,6 +235,27 @@ const FormItem = <
   });
 
   const container = renderContainer({ ...childrenProps, children: main });
+
+  useEffect(() => {
+    if (status === 'idle') {
+      signInField({
+        touched: false,
+        props: { name, rules, validateFirst },
+        validate: handleValidate(rules),
+        onStoreChange: handleStoreChange(name),
+      });
+
+      setStatus('succeeded');
+    }
+  }, [
+    name,
+    rules,
+    status,
+    validateFirst,
+    signInField,
+    handleValidate,
+    handleStoreChange,
+  ]);
 
   return <>{container}</>;
 };

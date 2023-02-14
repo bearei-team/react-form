@@ -248,29 +248,28 @@ const formInstance = <T extends Stores = Stores>(
   ) => {
     const { onValuesChange } = callbacks;
     const entities = getFieldEntities();
-    const handleStoreChange = (
-      name: keyof T,
-      onStoreChange: (name: keyof T) => void,
-    ) => {
-      setFieldTouched(name, true);
-      onStoreChange(name);
-    };
 
     Object.assign(stores, values);
 
     values &&
       response &&
-      Object.keys(values).forEach(key => {
-        const entity = entities.find(({ props }) => props.name === key);
+      Promise.all(
+        Object.keys(values).map(async key => {
+          const entity = entities.find(({ props }) => props.name === key);
 
-        if (entity) {
-          handleStoreChange(key, entity.onStoreChange);
+          if (entity) {
+            const handleStoreChange = (err?: FieldError) => {
+              setFieldTouched(key, true);
+              setFieldError({ [key]: err } as Errors<T>);
+              entity.onStoreChange(key);
+            };
 
-          validate && entity.validate();
-        }
-      });
-
-    onValuesChange?.(values, stores);
+            validate
+              ? await entity.validate().then(handleStoreChange)
+              : handleStoreChange();
+          }
+        }),
+      ).then(() => onValuesChange?.(values, stores));
   };
 
   function getFieldValue(): T;
@@ -289,10 +288,7 @@ const formInstance = <T extends Stores = Stores>(
     return !Array.isArray(name) && name ? values[name] : values;
   }
 
-  const setFieldError = (error: Errors<T>) => {
-    error && Object.assign(errors, error);
-  };
-
+  const setFieldError = (error: Errors<T>) => Object.assign(errors, error);
   function getFieldError(): Errors<T>;
   function getFieldError(name?: keyof T): Errors<T>[keyof T];
   function getFieldError(name?: (keyof T)[]): Errors<T>;
@@ -365,13 +361,9 @@ const formInstance = <T extends Stores = Stores>(
             .find(({ props }) => props.name === name)
             ?.validate()
             .then(result => {
-              if (result) {
-                setFieldError({ [name]: result } as Errors<T>);
+              setFieldError({ [name]: result } as Errors<T>);
 
-                return result;
-              }
-
-              return undefined;
+              return result;
             })
         : undefined;
 
@@ -408,7 +400,7 @@ const formInstance = <T extends Stores = Stores>(
     getFieldEntitiesName(names).forEach(handleReset);
   };
 
-  const submit = <E = unknown>(event?: E, skipValidate = false) => {
+  const submit = <E = unknown>(skipValidate = false, event?: E) => {
     const { onFinish, onFinishFailed } = callbacks;
     const handleFailed = (errs: Errors<T>) => {
       onFinishFailed?.(errs);
