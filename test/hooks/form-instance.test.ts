@@ -148,7 +148,7 @@ describe('test/hooks/formInstance.test.ts', () => {
     let finish: Stores | undefined;
 
     from.setCallbacks({
-      onFinish: ({ values }) => {
+      onFinish: values => {
         finish = values;
 
         expect(typeof finish !== 'undefined').toEqual(true);

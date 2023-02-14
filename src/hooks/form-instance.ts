@@ -46,7 +46,7 @@ export interface Callbacks<T> {
   /**
    * This function is called when the form is completed
    */
-  onFinish?: <E = unknown>(options: { event?: E; values: T }) => void;
+  onFinish?: (values: T) => void;
 
   /**
    * This function is called when the form fails to complete
@@ -400,14 +400,14 @@ const formInstance = <T extends Stores = Stores>(
     getFieldEntitiesName(names).forEach(handleReset);
   };
 
-  const submit = <E = unknown>(skipValidate = false, event?: E) => {
+  const submit = (skipValidate = false) => {
     const { onFinish, onFinishFailed } = callbacks;
     const handleFailed = (errs: Errors<T>) => {
       onFinishFailed?.(errs);
       forceUpdateForm();
     };
 
-    const handleFinish = () => onFinish?.({ event, values: stores });
+    const handleFinish = () => onFinish?.(stores);
 
     skipValidate
       ? handleFinish()
