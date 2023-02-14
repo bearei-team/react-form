@@ -98,21 +98,14 @@ const Form = <
     children: main,
   });
 
+  setCallbacks({ onFinish, onFinishFailed, onValuesChange });
+
   useEffect(() => {
     if (status === 'idle') {
-      setCallbacks({ onFinish, onFinishFailed, onValuesChange });
       setInitialValues(initialValues, status !== 'idle');
       setStatus('succeeded');
     }
-  }, [
-    initialValues,
-    onFinish,
-    onFinishFailed,
-    onValuesChange,
-    setCallbacks,
-    setInitialValues,
-    status,
-  ]);
+  }, [initialValues, setInitialValues, status]);
 
   return (
     <FormContext.Provider value={formInstance as FormInstance<Stores>}>

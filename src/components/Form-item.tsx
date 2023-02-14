@@ -241,20 +241,20 @@ const FormItem = <
       signInField({
         touched: false,
         props: { name, rules, validateFirst },
-        onStoreChange: handleStoreChange(name),
         validate: handleValidate(rules),
+        onStoreChange: handleStoreChange(name),
       });
 
       setStatus('succeeded');
     }
   }, [
-    handleStoreChange,
-    handleValidate,
     name,
     rules,
-    signInField,
     status,
     validateFirst,
+    signInField,
+    handleValidate,
+    handleStoreChange,
   ]);
 
   return <>{container}</>;

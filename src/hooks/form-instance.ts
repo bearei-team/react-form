@@ -400,7 +400,7 @@ const formInstance = <T extends Stores = Stores>(
     getFieldEntitiesName(names).forEach(handleReset);
   };
 
-  const submit = <E = unknown>(event?: E, skipValidate = false) => {
+  const submit = <E = unknown>(skipValidate = false, event?: E) => {
     const { onFinish, onFinishFailed } = callbacks;
     const handleFailed = (errs: Errors<T>) => {
       onFinishFailed?.(errs);
