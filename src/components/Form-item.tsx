@@ -13,6 +13,7 @@ import type { ViewProps } from 'react-native';
 import type { Stores } from '../hooks/form-instance';
 import useFormContext from '../hooks/use-form-context';
 import validateRule, { ValidateOptions } from '../utils/validate';
+import type { BaseFormProps } from './Form';
 
 /**
  * Controlled component props
@@ -51,7 +52,8 @@ export interface BaseFormItemProps<T, S>
   extends Partial<
     DetailedHTMLProps<HTMLAttributes<T>, T> &
       ViewProps &
-      Pick<ValidateOptions, 'rules' | 'validateFirst'>
+      Pick<ValidateOptions, 'rules' | 'validateFirst'> &
+      Pick<BaseFormProps<T, S>, 'layout'>
   > {
   /**
    * Custom ref
@@ -151,13 +153,13 @@ const FormItem = <
   ref,
   name,
   rules,
-  validateFirst,
   label,
   extra,
   required,
-  renderLabel,
+  validateFirst,
   renderExtra,
   renderMain,
+  renderLabel,
   renderContainer,
   ...args
 }: FormItemProps<T, S>) => {
@@ -229,9 +231,9 @@ const FormItem = <
   const main = renderMain({
     ...childrenProps,
     ...handleChildrenProps(),
+    ref,
     label: labelNode,
     extra: extraNode,
-    ref,
   });
 
   const container = renderContainer({ ...childrenProps, children: main });
@@ -239,8 +241,8 @@ const FormItem = <
   useEffect(() => {
     if (status === 'idle') {
       signInField({
-        touched: false,
         props: { name, rules, validateFirst },
+        touched: false,
         validate: handleValidate(rules),
         onStoreChange: handleStoreChange(name),
       });

@@ -232,6 +232,7 @@ describe('test/hooks/formInstance.test.ts', () => {
 
     from.setInitialValues({ name: 'name', password: 'password', code: 'code' });
     from.resetField('name');
+
     expect(!from.getFieldValue('name')).toEqual(true);
 
     from.resetField(['password']);
