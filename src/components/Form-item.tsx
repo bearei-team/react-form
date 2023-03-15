@@ -1,4 +1,4 @@
-import type { RuleItem } from 'async-validator';
+import type { RuleItem, ValidateError } from 'async-validator';
 import {
   DetailedHTMLProps,
   HTMLAttributes,
@@ -43,6 +43,11 @@ export interface ControlProps {
    * Component suffix
    */
   suffix?: ReactNode;
+
+  /**
+   * Field validation error message
+   */
+  errors?: ValidateError[];
 }
 
 /**
@@ -53,7 +58,7 @@ export interface BaseFormItemProps<T, S>
     DetailedHTMLProps<HTMLAttributes<T>, T> &
       ViewProps &
       Pick<ValidateOptions, 'rules' | 'validateFirst'> &
-      Pick<BaseFormProps<T, S>, 'layout'>
+      Pick<BaseFormProps<T, S>, 'labelLayout'>
   > {
   /**
    * Custom ref
@@ -134,6 +139,11 @@ export interface FormItemChildrenProps<T, S>
   value?: unknown;
 
   /**
+   * Field validation error message
+   */
+  errors?: ValidateError[];
+
+  /**
    * This function is called when the value of the form option changes
    */
   onValueChange?: (value?: unknown) => void;
@@ -169,9 +179,11 @@ const FormItem = <
   const { signInField, getFieldValue, setFieldsValue, getFieldError } =
     useFormContext<S>();
 
-  const errorMessage = name && getFieldError(name)?.errors[0].message;
+  const errors = name && getFieldError(name)?.errors;
+  const errorMessage = errors?.[0].message;
   const childrenProps = {
     ...args,
+    errors,
     required:
       typeof required === 'boolean'
         ? required

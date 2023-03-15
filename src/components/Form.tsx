@@ -33,7 +33,12 @@ export interface BaseFormProps<T, S>
   /**
    * Form layout
    */
-  layout?: 'horizontal' | 'vertical' | 'inline';
+  layout?: 'horizontal' | 'vertical';
+
+  /**
+   * Form label layout
+   */
+  labelLayout?: 'horizontal' | 'vertical' | 'inline';
 
   /**
    * Initializes the form value
