@@ -1,4 +1,4 @@
-import type { RuleItem } from 'async-validator';
+import type { RuleItem, ValidateError } from 'async-validator';
 import {
   DetailedHTMLProps,
   HTMLAttributes,
@@ -13,6 +13,7 @@ import type { ViewProps } from 'react-native';
 import type { Stores } from '../hooks/form-instance';
 import useFormContext from '../hooks/use-form-context';
 import validateRule, { ValidateOptions } from '../utils/validate';
+import type { BaseFormProps } from './Form';
 
 /**
  * Controlled component props
@@ -42,6 +43,11 @@ export interface ControlProps {
    * Component suffix
    */
   suffix?: ReactNode;
+
+  /**
+   * Field validation error message
+   */
+  errors?: ValidateError[];
 }
 
 /**
@@ -51,7 +57,8 @@ export interface BaseFormItemProps<T, S>
   extends Partial<
     DetailedHTMLProps<HTMLAttributes<T>, T> &
       ViewProps &
-      Pick<ValidateOptions, 'rules' | 'validateFirst'>
+      Pick<ValidateOptions, 'rules' | 'validateFirst'> &
+      Pick<BaseFormProps<T, S>, 'labelLayout'>
   > {
   /**
    * Custom ref
@@ -132,6 +139,11 @@ export interface FormItemChildrenProps<T, S>
   value?: unknown;
 
   /**
+   * Field validation error message
+   */
+  errors?: ValidateError[];
+
+  /**
    * This function is called when the value of the form option changes
    */
   onValueChange?: (value?: unknown) => void;
@@ -151,13 +163,13 @@ const FormItem = <
   ref,
   name,
   rules,
-  validateFirst,
   label,
   extra,
   required,
-  renderLabel,
+  validateFirst,
   renderExtra,
   renderMain,
+  renderLabel,
   renderContainer,
   ...args
 }: FormItemProps<T, S>) => {
@@ -167,9 +179,11 @@ const FormItem = <
   const { signInField, getFieldValue, setFieldsValue, getFieldError } =
     useFormContext<S>();
 
-  const errorMessage = name && getFieldError(name)?.errors[0].message;
+  const errors = name && getFieldError(name)?.errors;
+  const errorMessage = errors?.[0].message;
   const childrenProps = {
     ...args,
+    errors,
     required:
       typeof required === 'boolean'
         ? required
@@ -229,9 +243,9 @@ const FormItem = <
   const main = renderMain({
     ...childrenProps,
     ...handleChildrenProps(),
+    ref,
     label: labelNode,
     extra: extraNode,
-    ref,
   });
 
   const container = renderContainer({ ...childrenProps, children: main });
@@ -239,8 +253,8 @@ const FormItem = <
   useEffect(() => {
     if (status === 'idle') {
       signInField({
-        touched: false,
         props: { name, rules, validateFirst },
+        touched: false,
         validate: handleValidate(rules),
         onStoreChange: handleStoreChange(name),
       });

@@ -1,6 +1,6 @@
 {
   "name": "@bearei/react-form",
-  "version": "0.0.29",
+  "version": "0.0.36",
   "main": "./lib/commonjs/index",
   "module": "./lib/module/index",
   "types": "./lib/commonjs/index.d.ts",

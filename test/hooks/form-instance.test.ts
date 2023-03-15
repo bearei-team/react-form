@@ -148,7 +148,7 @@ describe('test/hooks/formInstance.test.ts', () => {
     let finish: Stores | undefined;
 
     from.setCallbacks({
-      onFinish: ({ values }) => {
+      onFinish: values => {
         finish = values;
 
         expect(typeof finish !== 'undefined').toEqual(true);
@@ -232,6 +232,7 @@ describe('test/hooks/formInstance.test.ts', () => {
 
     from.setInitialValues({ name: 'name', password: 'password', code: 'code' });
     from.resetField('name');
+
     expect(!from.getFieldValue('name')).toEqual(true);
 
     from.resetField(['password']);
